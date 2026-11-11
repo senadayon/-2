@@ -2,1559 +2,337 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CHAT</title>
-
-<script src="/socket.io/socket.io.js"></script>
-
-<!-- Cloudflare Turnstile -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOICE CRUSHER</title>
 <style>
-* {
-    box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:#090b12;
+  color:#fff;
+  font-family:Arial,"Noto Sans JP",sans-serif;
+  display:flex;
+  justify-content:center;
+  padding:25px 14px;
 }
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #eef2f3;
-    color: #222;
+.app{width:100%;max-width:540px}
+header{text-align:center;margin:25px 0 30px}
+.logo{font-size:38px;font-weight:900;letter-spacing:3px}
+.logo span{color:#ff365d}
+.subtitle{color:#858b9b;font-size:12px;letter-spacing:3px;margin-top:8px}
+.panel{
+  background:#141824;
+  border:1px solid #292f40;
+  border-radius:17px;
+  padding:21px;
+  margin-bottom:16px;
 }
-
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 7px;
-    padding: 10px 15px;
-    background: #3478db;
-    color: white;
-    font-weight: bold;
+h2{font-size:15px;margin:0 0 17px;color:#dfe4f0}
+.status{
+  display:flex;align-items:center;gap:10px;
+  color:#aab1c2;font-size:13px;
 }
-
-button:hover {
-    opacity: .85;
+.dot{width:9px;height:9px;border-radius:50%;background:#555}
+.dot.active{background:#35e69a;box-shadow:0 0 12px #35e69a}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{
+  background:#202638;border:1px solid #353d52;
+  color:#cbd1df;border-radius:12px;padding:17px 8px;
+  cursor:pointer;font-size:14px;font-weight:bold;
 }
-
-input, select {
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 7px;
-    width: 100%;
-    margin: 5px 0 12px;
+.mode.selected{
+  border:1px solid #ff365d;
+  background:#351b2a;color:#ff6480;
 }
-
-.hidden {
-    display: none !important;
+.mode small{display:block;font-size:11px;color:#9299a9;margin-top:7px}
+.control{margin:22px 0}
+.control-top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.value{color:#ff5474;font-weight:bold}
+input[type=range]{width:100%;margin-top:15px;accent-color:#ff365d;cursor:pointer}
+.scale{display:flex;justify-content:space-between;color:#70798c;font-size:10px}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{font-family:inherit}
+.main-btn{
+  border:0;border-radius:12px;padding:16px;
+  font-weight:bold;font-size:15px;cursor:pointer;
 }
-
-/* ログイン */
-
-#login-container {
-    width: 350px;
-    max-width: 94%;
-    margin: 45px auto;
-    background: white;
-    padding: 25px;
-    border-radius: 13px;
-    box-shadow: 0 3px 15px #0002;
+.start{background:#ff365d;color:white}
+.stop{background:#30384b;color:#fff}
+.main-btn:disabled{opacity:.4;cursor:not-allowed}
+.mute{
+  width:100%;margin-top:12px;padding:13px;
+  border:1px solid #394256;background:#202638;
+  border-radius:11px;color:#fff;cursor:pointer;
 }
-
-#login-container h1 {
-    text-align: center;
-    color: #3478db;
-}
-
-#login-container label {
-    font-weight: bold;
-}
-
-#avatar-preview {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    object-fit: cover;
-    display: block;
-    margin: 10px auto;
-    background: #ddd;
-}
-
-#login-error {
-    color: red;
-    font-size: 13px;
-    margin-top: 10px;
-}
-
-/* チャット */
-
-#chat-container {
-    max-width: 1100px;
-    height: 95vh;
-    margin: 15px auto;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 3px 15px #0002;
-    display: flex;
-    flex-direction: column;
-}
-
-#header {
-    background: #3478db;
-    color: white;
-    padding: 13px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-#header button {
-    background: white;
-    color: #3478db;
-}
-
-#main {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-}
-
-#sidebar {
-    width: 230px;
-    background: #f4f6f9;
-    border-right: 1px solid #ddd;
-    padding: 12px;
-    overflow-y: auto;
-}
-
-#sidebar h3 {
-    margin-top: 8px;
-}
-
-.room-item, .user-item {
-    padding: 10px;
-    margin: 5px 0;
-    background: white;
-    border-radius: 7px;
-    cursor: pointer;
-    overflow-wrap: anywhere;
-}
-
-.room-item:hover {
-    background: #e2edff;
-}
-
-#chat-area {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-#room-title {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    font-weight: bold;
-}
-
-#messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    background: #fafafa;
-}
-
-.message {
-    display: flex;
-    gap: 9px;
-    margin-bottom: 15px;
-    overflow-wrap: anywhere;
-}
-
-.message img.avatar {
-    width: 38px;
-    height: 38px;
-    object-fit: cover;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.message-content {
-    background: #e8effa;
-    padding: 9px 12px;
-    border-radius: 10px;
-    max-width: 85%;
-    min-width: 0;
-}
-
-.message-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: #3478db;
-    margin-bottom: 4px;
-}
-
-.message-time {
-    font-size: 10px;
-    color: #888;
-    margin-left: 8px;
-}
-
-.message-text {
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.message-text a {
-    color: #1768ce;
-    text-decoration: underline;
-}
-
-.chat-image {
-    display: block;
-    max-width: 280px;
-    max-height: 250px;
-    width: auto;
-    height: auto;
-    border-radius: 8px;
-    margin-top: 7px;
-}
-
-#chat-form {
-    display: flex;
-    padding: 12px;
-    border-top: 1px solid #ddd;
-    gap: 8px;
-}
-
-#message-input {
-    flex: 1;
-    min-width: 0;
-    margin: 0;
-}
-
-#send-button {
-    width: 85px;
-}
-
-/* 管理画面 */
-
-#admin-panel {
-    padding: 15px;
-    border-top: 2px solid #3478db;
-    background: #f4f6f9;
-    max-height: 230px;
-    overflow-y: auto;
-}
-
-#admin-panel h3 {
-    margin-top: 0;
-}
-
-.admin-row {
-    display: flex;
-    gap: 7px;
-    flex-wrap: wrap;
-    margin-bottom: 8px;
-}
-
-.admin-row input,
-.admin-row select {
-    flex: 1;
-    min-width: 100px;
-    margin: 0;
-}
-
-.admin-row button {
-    font-size: 12px;
-}
-
-#system-notice {
-    padding: 7px;
-    color: #3478db;
-    font-size: 13px;
-}
-
-#pinned {
-    padding: 8px;
-    background: #fff3c4;
-    color: #775600;
-}
-
-@media(max-width:650px) {
-    #chat-container {
-        height: 100vh;
-        margin: 0;
-        border-radius: 0;
-    }
-
-    #sidebar {
-        width: 115px;
-        padding: 7px;
-    }
-
-    #sidebar button {
-        width: 100%;
-        padding: 8px 4px;
-        font-size: 11px;
-    }
-
-    #messages {
-        padding: 8px;
-    }
-
-    .message-content {
-        max-width: 95%;
-    }
-
-    .chat-image {
-        max-width: 190px;
-    }
-}
+.note{font-size:11px;line-height:1.8;color:#858da0}
+footer{text-align:center;color:#555e70;font-size:11px;margin:25px}
 </style>
 </head>
-
 <body>
+<div class="app">
 
-<!-- ================= ログイン画面 ================= -->
+<header>
+  <div class="logo">VOICE <span>CRUSHER</span></div>
+  <div class="subtitle">REALTIME MICROPHONE DISTORTION</div>
+</header>
 
-<div id="login-container">
-
-    <h1>GTR-12</h1>
-    <p style="text-align:center;">Realtime Chat</p>
-
-    <form id="login-form">
-
-        <label>ユーザー名</label>
-        <input id="username" maxlength="20"
-               placeholder="ユーザー名" required>
-
-        <label>表示名</label>
-        <input id="display-name" maxlength="30"
-               placeholder="チャットに表示する名前">
-
-        <label>パスワード</label>
-        <input id="password" type="password"
-               placeholder="6文字以上" required>
-
-        <label>プロフィールアイコン</label>
-
-        <img id="avatar-preview"
-             src="https://placehold.co/75x75?text=Icon"
-             alt="アイコン">
-
-        <label>画像ファイル</label>
-        <input id="avatar-file" type="file"
-               accept="image/png,image/jpeg,image/gif,image/webp">
-
-        <label>または画像URL</label>
-        <input id="avatar-url" type="url"
-               placeholder="https://example.com/icon.png">
-
-        <label>参加するルーム</label>
-        <select id="login-room">
-            <option value="lobby">ロビー</option>
-        </select>
-
-        <label>ルームパスワード</label>
-        <input id="login-room-password"
-               type="password"
-               placeholder="必要な場合のみ入力">
-
-        <label>Owner認証コード（任意）</label>
-        <input id="admin-code" type="password"
-               placeholder="Owner専用">
-
-        <div id="captcha-area">
-            <!-- Site Keyを設定すると認証が表示される -->
-            <div id="turnstile-container"></div>
-        </div>
-
-        <button type="submit" style="width:100%;">
-            ログイン / 新規登録
-        </button>
-
-        <div id="login-error"></div>
-
-    </form>
-
+<div class="panel">
+  <h2>🎙 マイク状態</h2>
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <span id="status">停止中 - マイク未接続</span>
+  </div>
 </div>
 
-
-<!-- ================= チャット画面 ================= -->
-
-<div id="chat-container" class="hidden">
-
-    <div id="header">
-
-        <div>
-            <strong>GTR-12</strong>
-            <span id="my-name"></span>
-            <span id="my-role"></span>
-        </div>
-
-        <div>
-            <button id="notification-button">
-                🔔 通知ON
-            </button>
-
-            <button id="logout-button">
-                ログアウト
-            </button>
-        </div>
-
-    </div>
-
-    <div id="main">
-
-        <!-- サイドバー -->
-
-        <div id="sidebar">
-
-            <h3>ルーム</h3>
-
-            <div id="room-list"></div>
-
-            <button id="create-room-button">
-                ＋ ルーム作成
-            </button>
-
-            <hr>
-
-            <h3>オンライン</h3>
-
-            <div id="user-list"></div>
-
-        </div>
-
-        <!-- チャット -->
-
-        <div id="chat-area">
-
-            <div id="room-title">
-                ロビー
-            </div>
-
-            <div id="pinned" class="hidden"></div>
-
-            <div id="messages"></div>
-
-            <div id="system-notice"></div>
-
-            <form id="chat-form">
-
-                <input id="message-input"
-                       maxlength="1500"
-                       placeholder="メッセージを入力..."
-                       autocomplete="off">
-
-                <button id="send-button">
-                    送信
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- 管理画面 -->
-
-    <div id="admin-panel" class="hidden">
-
-        <h3>⚙ 管理パネル</h3>
-
-        <div class="admin-row">
-
-            <input id="target-user"
-                   placeholder="対象ユーザー名">
-
-            <select id="target-rank">
-                <option value="Regular">Regular</option>
-                <option value="Member">Member</option>
-                <option value="Moderator">Moderator</option>
-                <option value="Admin">Admin</option>
-            </select>
-
-            <button id="rank-button">
-                ランク変更
-            </button>
-
-        </div>
-
-        <div class="admin-row">
-
-            <button data-action="kick">キック</button>
-            <button data-action="ban">BAN</button>
-            <button data-action="mute">ミュート</button>
-            <button data-action="unmute">ミュート解除</button>
-            <button data-action="unban">BAN解除</button>
-
-        </div>
-
-        <div class="admin-row">
-
-            <button data-action="lock">チャットロック</button>
-            <button data-action="unlock">ロック解除</button>
-            <button data-action="clear">履歴削除</button>
-
-            <input id="slowmode-value"
-                   type="number"
-                   min="0"
-                   max="60"
-                   placeholder="秒数">
-
-            <button id="slowmode-button">
-                スローモード設定
-            </button>
-
-        </div>
-
-        <div class="admin-row">
-
-            <input id="pin-text"
-                   placeholder="固定メッセージ">
-
-            <button id="pin-button">固定</button>
-            <button id="unpin-button">固定解除</button>
-
-        </div>
-
-        <div class="admin-row">
-
-            <input id="ng-word"
-                   placeholder="NGワード">
-
-            <button id="ng-add-button">NG追加</button>
-            <button id="ng-remove-button">NG削除</button>
-
-        </div>
-
-        <hr>
-
-        <h4>ランク別権限設定（Owner専用）</h4>
-
-        <div class="admin-row">
-
-            <select id="permission-role">
-                <option value="Admin">Admin</option>
-                <option value="Moderator">Moderator</option>
-                <option value="Member">Member</option>
-            </select>
-
-            <button id="load-permissions">
-                権限読み込み
-            </button>
-
-        </div>
-
-        <div id="permission-list"></div>
-
-        <button id="save-permissions">
-            権限を保存
-        </button>
-
-    </div>
-
+<div class="panel">
+  <h2>⚡ 音割れモード</h2>
+  <div class="modes">
+    <button class="mode selected" id="crush">
+      🔊 バリバリ音割れ
+      <small>ブツブツ・ザラザラ</small>
+    </button>
+    <button class="mode" id="clip">
+      📢 マイク音割れ
+      <small>大音量のような歪み</small>
+    </button>
+  </div>
 </div>
 
+<div class="panel">
+  <h2>🎚 音声調整</h2>
+
+  <div class="control">
+    <div class="control-top">
+      <span>音割れの強さ</span>
+      <span class="value" id="strengthValue">75%</span>
+    </div>
+    <input id="strength" type="range" min="0" max="100" value="75">
+    <div class="scale"><span>弱い</span><span>強い</span></div>
+  </div>
+
+  <div class="control">
+    <div class="control-top">
+      <span>マイク入力音量</span>
+      <span class="value" id="inputValue">100%</span>
+    </div>
+    <input id="inputVolume" type="range" min="0" max="200" value="100">
+    <div class="scale"><span>0%</span><span>200%</span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>🎧 音声出力</h2>
+  <div class="buttons">
+    <button class="main-btn start" id="start">▶ 開始</button>
+    <button class="main-btn stop" id="stop" disabled>■ 停止</button>
+  </div>
+  <button class="mute" id="mute" disabled>🔇 ミュート</button>
+</div>
+
+<div class="panel">
+  <h2>💡 使い方</h2>
+  <div class="note">
+    ① 開始を押してマイクを許可します。<br>
+    ② 音割れモードを選びます。<br>
+    ③ 音割れの強さを調整します。<br>
+    ④ スピーカーまたはイヤホンで変換後の声を聞きます。<br><br>
+    ※ ハウリング防止のため、イヤホンの使用がおすすめです。
+    ※ 音量を上げすぎないようにしてください。
+  </div>
+</div>
+
+<footer>VOICE CRUSHER © 2026</footer>
+</div>
 
 <script>
-
-const socket = io();
-
-let currentUser = null;
-let currentRole = 'Regular';
-let currentRoom = 'lobby';
-let currentPermissions = {};
-let rooms = [];
-let captchaToken = '';
-let avatarUrl = '';
+let audioContext = null;
+let microphone = null;
+let source = null;
+let inputGain = null;
+let shaper = null;
+let compressor = null;
+let outputGain = null;
+let muted = false;
+let currentMode = "crush";
 
 const $ = id => document.getElementById(id);
 
+function setStatus(text, active) {
+  $("status").textContent = text;
+  $("dot").classList.toggle("active", active);
+}
 
-// ================= 通知 =================
+function makeCurve() {
+  if (!shaper) return;
 
-let notificationEnabled = false;
+  const amount = Number($("strength").value) / 100;
+  const curve = new Float32Array(44100);
 
-async function enableNotifications() {
+  for (let i = 0; i < curve.length; i++) {
+    let x = (i * 2) / (curve.length - 1) - 1;
+    let y;
 
-    if (!('Notification' in window)) {
-        notice('このブラウザは通知に対応していません');
-        return;
-    }
-
-    const result = await Notification.requestPermission();
-
-    if (result === 'granted') {
-        notificationEnabled = true;
-        $('notification-button').textContent = '🔔 通知ON';
-        notice('通知を有効にしました');
+    if (currentMode === "crush") {
+      // バリバリ・ブツブツ系
+      const drive = 1 + amount * 24;
+      const levels = Math.max(3, Math.round(32 - amount * 29));
+      let driven = Math.max(-1, Math.min(1, x * drive));
+      y = Math.round(driven * levels) / levels;
     } else {
-        notice('通知が許可されていません');
+      // マイクが割れたようなクリッピング
+      const drive = 1 + amount * 30;
+      const threshold = 1 - amount * 0.90;
+      let driven = x * drive;
+      y = Math.max(-threshold, Math.min(threshold, driven));
+      y = y / Math.max(threshold, 0.1);
     }
+
+    curve[i] = y;
+  }
+
+  shaper.curve = curve;
 }
 
-$('notification-button').onclick = enableNotifications;
+function updateControls() {
+  $("strengthValue").textContent = $("strength").value + "%";
+  $("inputValue").textContent = $("inputVolume").value + "%";
 
-function playSound() {
+  if (inputGain) {
+    inputGain.gain.value = Number($("inputVolume").value) / 100;
+  }
 
-    try {
-        const AudioContext =
-            window.AudioContext || window.webkitAudioContext;
-
-        const ctx = new AudioContext();
-        const oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        oscillator.frequency.value = 800;
-        gain.gain.value = 0.08;
-
-        oscillator.connect(gain);
-        gain.connect(ctx.destination);
-
-        oscillator.start();
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            ctx.currentTime + 0.25
-        );
-
-        oscillator.stop(ctx.currentTime + 0.25);
-
-    } catch(e) {
-        console.log(e);
-    }
+  makeCurve();
 }
 
-function desktopNotify(title, body, icon) {
+async function startAudio() {
+  try {
+    $("start").disabled = true;
+    setStatus("マイクに接続しています...", false);
 
-    if (
-        notificationEnabled &&
-        Notification.permission === 'granted' &&
-        document.hidden
-    ) {
-        const n = new Notification(title, {
-            body,
-            icon: icon || undefined
-        });
-
-        n.onclick = () => {
-            window.focus();
-            n.close();
-        };
-    }
-}
-
-
-// ================= 通知表示 =================
-
-function notice(text) {
-    $('system-notice').textContent = text;
-
-    setTimeout(() => {
-        $('system-notice').textContent = '';
-    }, 4000);
-}
-
-
-// ================= アイコン =================
-
-$('avatar-file').addEventListener('change', () => {
-
-    const file = $('avatar-file').files[0];
-
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-        alert('画像は2MB以下にしてください');
-        $('avatar-file').value = '';
-        return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = e => {
-        $('avatar-preview').src = e.target.result;
-    };
-
-    reader.readAsDataURL(file);
-});
-
-$('avatar-url').addEventListener('input', () => {
-
-    const url = $('avatar-url').value.trim();
-
-    if (/^https:\/\//i.test(url)) {
-        $('avatar-preview').src = url;
-    }
-});
-
-
-// ================= 画像アップロード =================
-
-async function uploadAvatar() {
-
-    const file = $('avatar-file').files[0];
-
-    if (file) {
-
-        const form = new FormData();
-        form.append('avatar', file);
-
-        const response = await fetch('/upload-avatar', {
-            method: 'POST',
-            body: form
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.error || '画像アップロード失敗');
-        }
-
-        return result.url;
-    }
-
-    const url = $('avatar-url').value.trim();
-
-    if (url && /^https:\/\//i.test(url)) {
-        return url;
-    }
-
-    return '';
-}
-
-
-// ================= CAPTCHA =================
-
-// Turnstile Site Keyを設定した場合に使用する
-const TURNSTILE_SITE_KEY = '';
-
-if (TURNSTILE_SITE_KEY) {
-
-    $('turnstile-container').className = 'cf-turnstile';
-
-    $('turnstile-container').dataset.sitekey =
-        TURNSTILE_SITE_KEY;
-
-}
-
-
-// ================= ログイン =================
-
-$('login-form').addEventListener('submit', async e => {
-
-    e.preventDefault();
-
-    $('login-error').textContent = '接続中...';
-
-    try {
-
-        avatarUrl = await uploadAvatar();
-
-    } catch(err) {
-
-        $('login-error').textContent = err.message;
-        return;
-    }
-
-    captchaToken = '';
-
-    if (window.turnstile && TURNSTILE_SITE_KEY) {
-        captchaToken = turnstile.getResponse() || '';
-    }
-
-    socket.emit('join', {
-
-        username: $('username').value.trim(),
-
-        displayName:
-            $('display-name').value.trim() ||
-            $('username').value.trim(),
-
-        password: $('password').value,
-
-        avatar: avatarUrl,
-
-        roomId: $('login-room').value,
-
-        roomPassword: $('login-room-password').value,
-
-        adminCode: $('admin-code').value,
-
-        captchaToken
-
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false
+      }
     });
 
-});
+    microphone = stream;
 
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    await audioContext.resume();
 
-// ================= ログイン成功 =================
+    source = audioContext.createMediaStreamSource(stream);
+    inputGain = audioContext.createGain();
+    shaper = audioContext.createWaveShaper();
+    compressor = audioContext.createDynamicsCompressor();
+    outputGain = audioContext.createGain();
 
-socket.on('joined', data => {
+    inputGain.gain.value = Number($("inputVolume").value) / 100;
 
-    currentUser = data.username;
-    currentRole = data.role;
-    currentRoom = data.roomId;
-    currentPermissions = data.permissions || {};
+    compressor.threshold.value = -12;
+    compressor.knee.value = 0;
+    compressor.ratio.value = 12;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.15;
 
-    $('login-container').classList.add('hidden');
-    $('chat-container').classList.remove('hidden');
+    outputGain.gain.value = 0.45;
 
-    $('my-name').textContent =
-        ' / ' + data.displayName;
+    shaper.oversample = "none";
+    makeCurve();
 
-    $('my-role').textContent =
-        ' [' + currentRole + ']';
+    source.connect(inputGain);
+    inputGain.connect(shaper);
+    shaper.connect(compressor);
+    compressor.connect(outputGain);
+    outputGain.connect(audioContext.destination);
 
-    $('room-title').textContent =
-        data.roomName;
+    muted = false;
+    $("mute").textContent = "🔇 ミュート";
 
-    $('messages').innerHTML = '';
+    $("start").disabled = true;
+    $("stop").disabled = false;
+    $("mute").disabled = false;
 
-    (data.messages || []).forEach(addMessage);
+    setStatus("接続中 - リアルタイム変換中", true);
 
-    rooms = data.rooms || [];
-
-    renderRooms();
-
-    updateAdminPanel();
-
-    $('message-input').focus();
-
-});
-
-socket.on('login_error', message => {
-
-    $('login-error').textContent = message;
-
-});
-
-
-// ================= 権限更新 =================
-
-function updateAdminPanel() {
-
-    const permissions = currentPermissions || {};
-
-    const canManage = Object.values(permissions).some(Boolean)
-        || currentRole === 'Owner';
-
-    $('admin-panel').classList.toggle(
-        'hidden',
-        !canManage
-    );
-
-    document.querySelectorAll('[data-action]').forEach(button => {
-
-        const action = button.dataset.action;
-
-        button.disabled =
-            currentRole !== 'Owner' &&
-            permissions[action] !== true;
-
-        button.style.opacity =
-            button.disabled ? '.4' : '1';
-
-    });
-
-    $('rank-button').disabled =
-        currentRole === 'Owner'
-            ? false
-            : permissions.rank !== true;
-
-    $('load-permissions').style.display =
-        currentRole === 'Owner' ? '' : 'none';
-
-    $('save-permissions').style.display =
-        currentRole === 'Owner' ? '' : 'none';
-
+  } catch (error) {
+    console.error(error);
+    setStatus("マイクを使用できません: " + error.message, false);
+    $("start").disabled = false;
+    stopAudio();
+  }
 }
 
-socket.on('role_updated', data => {
+async function stopAudio() {
+  if (source) {
+    try { source.disconnect(); } catch(e) {}
+  }
 
-    currentRole = data.role;
-    currentPermissions = data.permissions || {};
+  if (microphone) {
+    microphone.getTracks().forEach(track => track.stop());
+  }
 
-    $('my-role').textContent = ' [' + currentRole + ']';
+  if (audioContext && audioContext.state !== "closed") {
+    await audioContext.close();
+  }
 
-    updateAdminPanel();
+  audioContext = null;
+  microphone = null;
+  source = null;
+  inputGain = null;
+  shaper = null;
+  compressor = null;
+  outputGain = null;
 
-    notice('ランクが変更されました: ' + currentRole);
+  $("start").disabled = false;
+  $("stop").disabled = true;
+  $("mute").disabled = true;
+  muted = false;
 
-});
-
-socket.on('permissions_updated', data => {
-
-    if (data.role === currentRole) {
-
-        currentPermissions = data.permissions || {};
-
-        updateAdminPanel();
-
-        notice('権限が更新されました');
-    }
-
-});
-
-
-// ================= メッセージ =================
-
-function addMessage(msg) {
-
-    const container = document.createElement('div');
-    container.className = 'message';
-
-    const avatar = document.createElement('img');
-    avatar.className = 'avatar';
-
-    avatar.src = safeImageUrl(msg.avatar) ||
-        'https://placehold.co/40x40?text=User';
-
-    avatar.onerror = () => {
-        avatar.src = 'https://placehold.co/40x40?text=User';
-    };
-
-    const content = document.createElement('div');
-    content.className = 'message-content';
-
-    const name = document.createElement('div');
-    name.className = 'message-name';
-
-    name.textContent =
-        (msg.displayName || msg.username) +
-        ' [' + (msg.role || 'Regular') + ']';
-
-    const time = document.createElement('span');
-    time.className = 'message-time';
-    time.textContent = msg.time || '';
-
-    name.appendChild(time);
-
-    const text = document.createElement('div');
-    text.className = 'message-text';
-
-    renderText(text, msg.text || '');
-
-    content.appendChild(name);
-    content.appendChild(text);
-
-    container.appendChild(avatar);
-    container.appendChild(content);
-
-    $('messages').appendChild(container);
-
-    $('messages').scrollTop =
-        $('messages').scrollHeight;
-
+  $("mute").textContent = "🔇 ミュート";
+  setStatus("停止中 - マイク未接続", false);
 }
 
-function safeImageUrl(url) {
+function toggleMute() {
+  if (!outputGain) return;
 
-    if (
-        typeof url !== 'string' ||
-        !/^https:\/\//i.test(url) &&
-        !url.startsWith('/uploads/')
-    ) {
-        return '';
-    }
+  muted = !muted;
+  outputGain.gain.value = muted ? 0 : 0.45;
 
-    return url;
+  $("mute").textContent = muted ? "🔊 ミュート解除" : "🔇 ミュート";
 }
 
+function setMode(mode) {
+  currentMode = mode;
 
-// URLと画像を自動判定
-function renderText(element, message) {
+  $("crush").classList.toggle("selected", mode === "crush");
+  $("clip").classList.toggle("selected", mode === "clip");
 
-    const regex =
-        /(https:\/\/[^\s<>"']+|http:\/\/[^\s<>"']+)/gi;
-
-    let last = 0;
-    let match;
-
-    while ((match = regex.exec(message)) !== null) {
-
-        element.appendChild(
-            document.createTextNode(
-                message.slice(last, match.index)
-            )
-        );
-
-        let url = match[0];
-
-        const trailing = url.match(/[.,!?。、）)]+$/);
-
-        let cleanUrl = trailing
-            ? url.slice(0, -trailing[0].length)
-            : url;
-
-        if (
-            /^https?:\/\//i.test(cleanUrl)
-        ) {
-
-            let isImage = false;
-
-            try {
-
-                const parsed = new URL(cleanUrl);
-
-                isImage =
-                    /\.(png|jpe?g|gif|webp|bmp)$/i.test(
-                        parsed.pathname
-                    );
-
-            } catch(e) {}
-
-            if (isImage) {
-
-                const image = document.createElement('img');
-
-                image.className = 'chat-image';
-                image.src = cleanUrl;
-                image.alt = '送信された画像';
-
-                image.loading = 'lazy';
-
-                image.onerror = () => {
-                    image.remove();
-                };
-
-                image.onclick = () => {
-                    window.open(
-                        cleanUrl,
-                        '_blank',
-                        'noopener,noreferrer'
-                    );
-                };
-
-                element.appendChild(image);
-
-            } else {
-
-                const link = document.createElement('a');
-
-                link.href = cleanUrl;
-                link.textContent = cleanUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-
-                element.appendChild(link);
-
-            }
-
-        } else {
-
-            element.appendChild(
-                document.createTextNode(cleanUrl)
-            );
-
-        }
-
-        if (trailing) {
-            element.appendChild(
-                document.createTextNode(trailing[0])
-            );
-        }
-
-        last = regex.lastIndex;
-    }
-
-    element.appendChild(
-        document.createTextNode(
-            message.slice(last)
-        )
-    );
-
+  makeCurve();
 }
 
+$("start").addEventListener("click", startAudio);
+$("stop").addEventListener("click", stopAudio);
+$("mute").addEventListener("click", toggleMute);
 
-// サーバーから新着メッセージ
-socket.on('chat_message', msg => {
+$("crush").addEventListener("click", () => setMode("crush"));
+$("clip").addEventListener("click", () => setMode("clip"));
 
-    addMessage(msg);
+$("strength").addEventListener("input", updateControls);
+$("inputVolume").addEventListener("input", updateControls);
 
-    if (msg.username !== currentUser) {
-
-        playSound();
-
-        desktopNotify(
-            msg.displayName || msg.username,
-            msg.text,
-            msg.avatar
-        );
-
-    }
-
+window.addEventListener("pagehide", () => {
+  if (microphone) {
+    microphone.getTracks().forEach(track => track.stop());
+  }
+  if (audioContext && audioContext.state !== "closed") {
+    audioContext.close();
+  }
 });
 
-
-// システムメッセージ
-socket.on('system_message', message => {
-
-    notice(message);
-
-});
-
-
-// ================= 送信 =================
-
-$('chat-form').addEventListener('submit', e => {
-
-    e.preventDefault();
-
-    const text = $('message-input').value.trim();
-
-    if (!text) return;
-
-    socket.emit('chat_message', text);
-
-    $('message-input').value = '';
-
-});
-
-
-// ================= ルーム一覧 =================
-
-function renderRooms() {
-
-    $('room-list').innerHTML = '';
-
-    rooms.forEach(room => {
-
-        const item = document.createElement('div');
-
-        item.className = 'room-item';
-
-        item.textContent =
-            (room.locked ? '🔒 ' : '') +
-            room.name +
-            ' (' + room.users + ')';
-
-        item.onclick = () => joinRoom(room);
-
-        $('room-list').appendChild(item);
-
-    });
-
-}
-
-socket.on('rooms_data', list => {
-
-    rooms = list || [];
-
-    renderRooms();
-
-});
-
-
-// ログイン時のルーム一覧更新
-function refreshRooms() {
-    socket.emit('list_rooms');
-}
-
-
-// ================= ルーム参加 =================
-
-function joinRoom(room) {
-
-    let password = '';
-
-    if (room.locked) {
-
-        password = prompt(
-            'ルームパスワードを入力してください'
-        );
-
-        if (password === null) return;
-    }
-
-    socket.emit('join_room', {
-        roomId: room.id,
-        password
-    });
-
-}
-
-socket.on('room_joined', data => {
-
-    currentRoom = data.roomId;
-
-    $('room-title').textContent =
-        data.roomName;
-
-    $('messages').innerHTML = '';
-
-    (data.messages || []).forEach(addMessage);
-
-    notice(data.roomName + ' に参加しました');
-
-});
-
-
-// ================= ルーム作成 =================
-
-$('create-room-button').onclick = () => {
-
-    if (
-        currentRole !== 'Owner' &&
-        currentPermissions.create_room !== true
-    ) {
-        return notice('ルーム作成権限がありません');
-    }
-
-    const name = prompt('ルーム名を入力してください');
-
-    if (!name) return;
-
-    const password = prompt(
-        'パスワードを設定しますか？\n設定しない場合は空欄にしてください'
-    );
-
-    if (password === null) return;
-
-    socket.emit('create_room', {
-        name,
-        password
-    });
-
-};
-
-socket.on('room_created', data => {
-
-    notice('ルームを作成しました');
-
-    socket.emit('list_rooms');
-
-    socket.emit('join_room', {
-        roomId: data.id,
-        password: ''
-    });
-
-});
-
-
-// ================= オンライン一覧 =================
-
-socket.on('user_list', users => {
-
-    $('user-list').innerHTML = '';
-
-    users.forEach(user => {
-
-        const item = document.createElement('div');
-
-        item.className = 'user-item';
-
-        item.textContent =
-            '● ' +
-            user.displayName +
-            ' [' + user.role + ']';
-
-        item.style.color = '#287b44';
-
-        item.onclick = () => {
-            $('target-user').value = user.username;
-        };
-
-        $('user-list').appendChild(item);
-
-    });
-
-});
-
-
-// ================= 管理操作 =================
-
-function adminAction(action, value) {
-
-    const target = $('target-user').value.trim();
-
-    socket.emit('admin_action', {
-        action,
-        target,
-        value
-    });
-
-}
-
-document.querySelectorAll('[data-action]').forEach(button => {
-
-    button.onclick = () => {
-
-        const action = button.dataset.action;
-
-        if (action === 'clear') {
-
-            if (!confirm('チャット履歴を削除しますか？')) {
-                return;
-            }
-        }
-
-        adminAction(action);
-
-    };
-
-});
-
-
-// ランク変更
-$('rank-button').onclick = () => {
-
-    const target = $('target-user').value.trim();
-
-    if (!target) {
-        return notice('対象ユーザーを入力してください');
-    }
-
-    socket.emit('admin_action', {
-        action: 'rank',
-        target,
-        value: $('target-rank').value
-    });
-
-};
-
-
-// スローモード
-$('slowmode-button').onclick = () => {
-
-    adminAction(
-        'slowmode',
-        Number($('slowmode-value').value)
-    );
-
-};
-
-
-// ピン留め
-$('pin-button').onclick = () => {
-
-    adminAction(
-        'pin',
-        $('pin-text').value
-    );
-
-};
-
-$('unpin-button').onclick = () => {
-
-    adminAction('unpin');
-
-};
-
-socket.on('pinned_message', message => {
-
-    if (message) {
-
-        $('pinned').textContent =
-            '📌 ' + message;
-
-        $('pinned').classList.remove('hidden');
-
-    } else {
-
-        $('pinned').classList.add('hidden');
-
-    }
-
-});
-
-
-// NGワード
-$('ng-add-button').onclick = () => {
-
-    adminAction(
-        'ng_add',
-        $('ng-word').value
-    );
-
-};
-
-$('ng-remove-button').onclick = () => {
-
-    adminAction(
-        'ng_remove',
-        $('ng-word').value
-    );
-
-};
-
-
-// ================= 権限設定 =================
-
-let permissionSettings = {};
-
-$('load-permissions').onclick = () => {
-
-    if (currentRole !== 'Owner') {
-        return notice('Owner専用機能です');
-    }
-
-    socket.emit('get_permissions');
-
-};
-
-socket.on('permissions_data', data => {
-
-    permissionSettings = data;
-
-    renderPermissionSettings();
-
-});
-
-function renderPermissionSettings() {
-
-    const role = $('permission-role').value;
-
-    const perms = permissionSettings[role];
-
-    if (!perms) return;
-
-    $('permission-list').innerHTML = '';
-
-    Object.entries(perms).forEach(([key, value]) => {
-
-        const label = document.createElement('label');
-
-        label.style.display = 'block';
-        label.style.margin = '5px';
-
-        const checkbox = document.createElement('input');
-
-        checkbox.type = 'checkbox';
-        checkbox.checked = value;
-        checkbox.dataset.permission = key;
-
-        checkbox.style.width = 'auto';
-        checkbox.style.marginRight = '8px';
-
-        label.appendChild(checkbox);
-
-        label.appendChild(
-            document.createTextNode(key)
-        );
-
-        $('permission-list').appendChild(label);
-
-    });
-
-}
-
-$('permission-role').onchange = renderPermissionSettings;
-
-
-$('save-permissions').onclick = () => {
-
-    if (currentRole !== 'Owner') {
-        return notice('Owner専用機能です');
-    }
-
-    const role = $('permission-role').value;
-
-    const permissions = {};
-
-    document.querySelectorAll(
-        '[data-permission]'
-    ).forEach(checkbox => {
-
-        permissions[checkbox.dataset.permission] =
-            checkbox.checked;
-
-    });
-
-    socket.emit('admin_action', {
-        action: 'set_permissions',
-        role,
-        permissions
-    });
-
-};
-
-
-// ================= 履歴削除 =================
-
-socket.on('clear_messages', () => {
-
-    $('messages').innerHTML = '';
-
-});
-
-
-// ================= ログアウト =================
-
-$('logout-button').onclick = () => {
-
-    if (confirm('ログアウトしますか？')) {
-
-        location.reload();
-
-    }
-
-};
-
-
-// ================= 接続 =================
-
-socket.on('connect', () => {
-
-    console.log('GTR-12 connected');
-
-});
-
-socket.on('disconnect', () => {
-
-    notice('サーバーとの接続が切れました');
-
-});
-
-
-// ログイン画面のルーム一覧
-function updateLoginRooms() {
-
-    socket.emit('list_rooms');
-
-}
-
-socket.on('rooms_data', list => {
-
-    rooms = list || [];
-
-    renderRooms();
-
-    const select = $('login-room');
-
-    const selected = select.value;
-
-    select.innerHTML = '';
-
-    rooms.forEach(room => {
-
-        const option = document.createElement('option');
-
-        option.value = room.id;
-
-        option.textContent =
-            (room.locked ? '🔒 ' : '') + room.name;
-
-        select.appendChild(option);
-
-    });
-
-    if (rooms.some(r => r.id === selected)) {
-        select.value = selected;
-    }
-
-});
-
-
-// ================= 終了 =================
-
+updateControls();
 </script>
-
 </body>
 </html>
