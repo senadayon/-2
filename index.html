@@ -2,337 +2,349 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOICE CRUSHER</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VOICE CRUSHER v2</title>
 <style>
 *{box-sizing:border-box}
 body{
-  margin:0;
-  min-height:100vh;
-  background:#090b12;
-  color:#fff;
-  font-family:Arial,"Noto Sans JP",sans-serif;
-  display:flex;
-  justify-content:center;
-  padding:25px 14px;
+ margin:0;background:#090b12;color:#fff;
+ font-family:Arial,"Noto Sans JP",sans-serif;
+ padding:24px 14px;min-height:100vh;
 }
-.app{width:100%;max-width:540px}
-header{text-align:center;margin:25px 0 30px}
-.logo{font-size:38px;font-weight:900;letter-spacing:3px}
+.app{max-width:550px;margin:auto}
+header{text-align:center;margin:24px 0 30px}
+.logo{font-size:34px;font-weight:900;letter-spacing:2px}
 .logo span{color:#ff365d}
-.subtitle{color:#858b9b;font-size:12px;letter-spacing:3px;margin-top:8px}
+.sub{font-size:11px;color:#81899c;letter-spacing:3px;margin-top:8px}
 .panel{
-  background:#141824;
-  border:1px solid #292f40;
-  border-radius:17px;
-  padding:21px;
-  margin-bottom:16px;
+ background:#151a27;border:1px solid #293145;
+ padding:20px;border-radius:16px;margin-bottom:15px;
 }
-h2{font-size:15px;margin:0 0 17px;color:#dfe4f0}
-.status{
-  display:flex;align-items:center;gap:10px;
-  color:#aab1c2;font-size:13px;
-}
-.dot{width:9px;height:9px;border-radius:50%;background:#555}
-.dot.active{background:#35e69a;box-shadow:0 0 12px #35e69a}
+h2{font-size:15px;margin:0 0 17px}
+.status{display:flex;align-items:center;gap:10px;font-size:13px;color:#aeb6c8}
+.dot{width:9px;height:9px;background:#666;border-radius:50%}
+.dot.on{background:#39e99c;box-shadow:0 0 10px #39e99c}
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .mode{
-  background:#202638;border:1px solid #353d52;
-  color:#cbd1df;border-radius:12px;padding:17px 8px;
-  cursor:pointer;font-size:14px;font-weight:bold;
+ background:#20283a;border:1px solid #39435a;
+ border-radius:12px;padding:16px 8px;color:#ddd;
+ font-weight:bold;cursor:pointer;
 }
-.mode.selected{
-  border:1px solid #ff365d;
-  background:#351b2a;color:#ff6480;
-}
-.mode small{display:block;font-size:11px;color:#9299a9;margin-top:7px}
+.mode.selected{border-color:#ff365d;background:#381b2a;color:#ff6682}
+.mode small{display:block;font-size:10px;color:#9ca5b7;margin-top:7px}
 .control{margin:22px 0}
-.control-top{display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.value{color:#ff5474;font-weight:bold}
-input[type=range]{width:100%;margin-top:15px;accent-color:#ff365d;cursor:pointer}
-.scale{display:flex;justify-content:space-between;color:#70798c;font-size:10px}
-.buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.top{display:flex;justify-content:space-between;font-size:13px}
+.val{color:#ff5878;font-weight:bold}
+input[type=range]{width:100%;accent-color:#ff365d;margin-top:15px}
+select{
+ width:100%;padding:13px;margin-top:10px;
+ background:#20283a;color:white;border:1px solid #39435a;
+ border-radius:10px;font-size:13px;
+}
 button{font-family:inherit}
-.main-btn{
-  border:0;border-radius:12px;padding:16px;
-  font-weight:bold;font-size:15px;cursor:pointer;
-}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{padding:16px;border:0;border-radius:11px;font-weight:bold;cursor:pointer}
 .start{background:#ff365d;color:white}
-.stop{background:#30384b;color:#fff}
-.main-btn:disabled{opacity:.4;cursor:not-allowed}
-.mute{
-  width:100%;margin-top:12px;padding:13px;
-  border:1px solid #394256;background:#202638;
-  border-radius:11px;color:#fff;cursor:pointer;
+.stop{background:#30394d;color:white}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.mute,.refresh{
+ width:100%;padding:13px;margin-top:10px;
+ border:1px solid #39435a;border-radius:10px;
+ background:#20283a;color:white;cursor:pointer
 }
-.note{font-size:11px;line-height:1.8;color:#858da0}
-footer{text-align:center;color:#555e70;font-size:11px;margin:25px}
+.note{font-size:11px;line-height:1.9;color:#929bad}
+footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 </style>
 </head>
 <body>
 <div class="app">
-
 <header>
-  <div class="logo">VOICE <span>CRUSHER</span></div>
-  <div class="subtitle">REALTIME MICROPHONE DISTORTION</div>
+ <div class="logo">VOICE <span>CRUSHER</span></div>
+ <div class="sub">REALTIME VOICE DISTORTION v2</div>
 </header>
 
 <div class="panel">
-  <h2>🎙 マイク状態</h2>
-  <div class="status">
-    <div class="dot" id="dot"></div>
-    <span id="status">停止中 - マイク未接続</span>
-  </div>
+ <h2>🎙 マイク状態</h2>
+ <div class="status">
+  <div class="dot" id="dot"></div>
+  <span id="status">停止中</span>
+ </div>
 </div>
 
 <div class="panel">
-  <h2>⚡ 音割れモード</h2>
-  <div class="modes">
-    <button class="mode selected" id="crush">
-      🔊 バリバリ音割れ
-      <small>ブツブツ・ザラザラ</small>
-    </button>
-    <button class="mode" id="clip">
-      📢 マイク音割れ
-      <small>大音量のような歪み</small>
-    </button>
-  </div>
+ <h2>🎧 マイク選択</h2>
+ <select id="mic">
+  <option value="">マイクを選択してください</option>
+ </select>
+ <button class="refresh" id="refresh">↻ マイク一覧を更新</button>
 </div>
 
 <div class="panel">
-  <h2>🎚 音声調整</h2>
-
-  <div class="control">
-    <div class="control-top">
-      <span>音割れの強さ</span>
-      <span class="value" id="strengthValue">75%</span>
-    </div>
-    <input id="strength" type="range" min="0" max="100" value="75">
-    <div class="scale"><span>弱い</span><span>強い</span></div>
-  </div>
-
-  <div class="control">
-    <div class="control-top">
-      <span>マイク入力音量</span>
-      <span class="value" id="inputValue">100%</span>
-    </div>
-    <input id="inputVolume" type="range" min="0" max="200" value="100">
-    <div class="scale"><span>0%</span><span>200%</span></div>
-  </div>
+ <h2>⚡ 音割れモード</h2>
+ <div class="modes">
+  <button class="mode selected" id="crush">
+   🔊 バリバリ音割れ
+   <small>ブツブツ・ザラザラ系</small>
+  </button>
+  <button class="mode" id="clip">
+   📢 マイク音割れ
+   <small>大音量クリッピング系</small>
+  </button>
+ </div>
 </div>
 
 <div class="panel">
-  <h2>🎧 音声出力</h2>
-  <div class="buttons">
-    <button class="main-btn start" id="start">▶ 開始</button>
-    <button class="main-btn stop" id="stop" disabled>■ 停止</button>
+ <h2>🎚 音声調整</h2>
+ <div class="control">
+  <div class="top">
+   <span>音割れの強さ</span>
+   <span class="val" id="strengthVal">75%</span>
   </div>
-  <button class="mute" id="mute" disabled>🔇 ミュート</button>
+  <input type="range" id="strength" min="0" max="100" value="75">
+  <div class="note">0%：弱い / 100%：激しい</div>
+ </div>
+ <div class="control">
+  <div class="top">
+   <span>マイク入力音量</span>
+   <span class="val" id="volumeVal">100%</span>
+  </div>
+  <input type="range" id="volume" min="0" max="200" value="100">
+ </div>
+ <div class="control">
+  <div class="top">
+   <span>再生音量</span>
+   <span class="val" id="outputVal">40%</span>
+  </div>
+  <input type="range" id="output" min="0" max="100" value="40">
+ </div>
 </div>
 
 <div class="panel">
-  <h2>💡 使い方</h2>
-  <div class="note">
-    ① 開始を押してマイクを許可します。<br>
-    ② 音割れモードを選びます。<br>
-    ③ 音割れの強さを調整します。<br>
-    ④ スピーカーまたはイヤホンで変換後の声を聞きます。<br><br>
-    ※ ハウリング防止のため、イヤホンの使用がおすすめです。
-    ※ 音量を上げすぎないようにしてください。
-  </div>
+ <h2>🔊 リアルタイム再生</h2>
+ <div class="buttons">
+  <button class="btn start" id="start">▶ 開始</button>
+  <button class="btn stop" id="stop" disabled>■ 停止</button>
+ </div>
+ <button class="mute" id="mute" disabled>🔇 ミュート</button>
 </div>
 
-<footer>VOICE CRUSHER © 2026</footer>
+<div class="panel">
+ <h2>📖 使い方</h2>
+ <div class="note">
+  1. マイクを選択する（最初は選択しなくてもOK）<br>
+  2. 開始を押してマイクを許可する<br>
+  3. 音割れモードを選ぶ<br>
+  4. 強さと音量を調整する<br>
+  5. イヤホンで変換された声を聞く<br><br>
+  ※ イヤホンを使うとハウリングを防ぎやすいよ。<br>
+  ※ 音量は小さめから調整してね。
+ </div>
+</div>
+
+<div class="panel">
+ <h2>⚠️ GeForce NOWについて</h2>
+ <div class="note">
+  このバージョンは変換した音声をブラウザから再生する機能だよ。<br>
+  GeForce NOWの仮想マイクとして直接使用する機能はまだないよ。
+ </div>
+</div>
+
+<footer>VOICE CRUSHER v2 © 2026</footer>
 </div>
 
 <script>
-let audioContext = null;
-let microphone = null;
-let source = null;
-let inputGain = null;
-let shaper = null;
-let compressor = null;
-let outputGain = null;
-let muted = false;
-let currentMode = "crush";
-
 const $ = id => document.getElementById(id);
 
-function setStatus(text, active) {
-  $("status").textContent = text;
-  $("dot").classList.toggle("active", active);
+let ctx = null;
+let stream = null;
+let source = null;
+let input = null;
+let shaper = null;
+let outputGain = null;
+let mode = "crush";
+let muted = false;
+let starting = false;
+
+function status(message,active=false){
+ $("status").textContent=message;
+ $("dot").classList.toggle("on",active);
 }
 
-function makeCurve() {
-  if (!shaper) return;
+function makeCurve(){
+ if(!shaper)return;
 
-  const amount = Number($("strength").value) / 100;
-  const curve = new Float32Array(44100);
+ const strength=Number($("strength").value)/100;
+ const curve=new Float32Array(44100);
 
-  for (let i = 0; i < curve.length; i++) {
-    let x = (i * 2) / (curve.length - 1) - 1;
-    let y;
+ for(let i=0;i<curve.length;i++){
+  const x=i*2/(curve.length-1)-1;
+  let y;
 
-    if (currentMode === "crush") {
-      // バリバリ・ブツブツ系
-      const drive = 1 + amount * 24;
-      const levels = Math.max(3, Math.round(32 - amount * 29));
-      let driven = Math.max(-1, Math.min(1, x * drive));
-      y = Math.round(driven * levels) / levels;
-    } else {
-      // マイクが割れたようなクリッピング
-      const drive = 1 + amount * 30;
-      const threshold = 1 - amount * 0.90;
-      let driven = x * drive;
-      y = Math.max(-threshold, Math.min(threshold, driven));
-      y = y / Math.max(threshold, 0.1);
-    }
-
-    curve[i] = y;
+  if(mode==="crush"){
+   const drive=1+strength*24;
+   const levels=Math.max(3,Math.round(32-strength*29));
+   const v=Math.max(-1,Math.min(1,x*drive));
+   y=Math.round(v*levels)/levels;
+  }else{
+   const drive=1+strength*30;
+   const threshold=1-strength*.90;
+   const v=x*drive;
+   y=Math.max(-threshold,Math.min(threshold,v))/Math.max(threshold,.1);
   }
 
-  shaper.curve = curve;
+  curve[i]=y;
+ }
+
+ shaper.curve=curve;
 }
 
-function updateControls() {
-  $("strengthValue").textContent = $("strength").value + "%";
-  $("inputValue").textContent = $("inputVolume").value + "%";
+function update(){
+ $("strengthVal").textContent=$("strength").value+"%";
+ $("volumeVal").textContent=$("volume").value+"%";
+ $("outputVal").textContent=$("output").value+"%";
 
-  if (inputGain) {
-    inputGain.gain.value = Number($("inputVolume").value) / 100;
-  }
+ if(input)input.gain.value=Number($("volume").value)/100;
+ if(outputGain)outputGain.gain.value=muted?0:Number($("output").value)/100;
 
-  makeCurve();
+ makeCurve();
 }
 
-async function startAudio() {
-  try {
-    $("start").disabled = true;
-    setStatus("マイクに接続しています...", false);
+async function refreshMics(){
+ try{
+  const devices=await navigator.mediaDevices.enumerateDevices();
+  const mic=$("mic");
+  const previous=mic.value;
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false
-      }
-    });
+  mic.innerHTML='<option value="">自動選択（既定のマイク）</option>';
 
-    microphone = stream;
+  devices.filter(d=>d.kind==="audioinput").forEach((d,i)=>{
+   const option=document.createElement("option");
+   option.value=d.deviceId;
+   option.textContent=d.label||"マイク "+(i+1);
+   mic.appendChild(option);
+  });
 
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    await audioContext.resume();
-
-    source = audioContext.createMediaStreamSource(stream);
-    inputGain = audioContext.createGain();
-    shaper = audioContext.createWaveShaper();
-    compressor = audioContext.createDynamicsCompressor();
-    outputGain = audioContext.createGain();
-
-    inputGain.gain.value = Number($("inputVolume").value) / 100;
-
-    compressor.threshold.value = -12;
-    compressor.knee.value = 0;
-    compressor.ratio.value = 12;
-    compressor.attack.value = 0.003;
-    compressor.release.value = 0.15;
-
-    outputGain.gain.value = 0.45;
-
-    shaper.oversample = "none";
-    makeCurve();
-
-    source.connect(inputGain);
-    inputGain.connect(shaper);
-    shaper.connect(compressor);
-    compressor.connect(outputGain);
-    outputGain.connect(audioContext.destination);
-
-    muted = false;
-    $("mute").textContent = "🔇 ミュート";
-
-    $("start").disabled = true;
-    $("stop").disabled = false;
-    $("mute").disabled = false;
-
-    setStatus("接続中 - リアルタイム変換中", true);
-
-  } catch (error) {
-    console.error(error);
-    setStatus("マイクを使用できません: " + error.message, false);
-    $("start").disabled = false;
-    stopAudio();
+  if(previous && [...mic.options].some(o=>o.value===previous)){
+   mic.value=previous;
   }
+ }catch(e){
+  console.error(e);
+ }
 }
 
-async function stopAudio() {
-  if (source) {
-    try { source.disconnect(); } catch(e) {}
-  }
+async function start(){
+ if(starting)return;
+ starting=true;
+ $("start").disabled=true;
+ status("マイクに接続中...");
 
-  if (microphone) {
-    microphone.getTracks().forEach(track => track.stop());
-  }
+ try{
+  const selected=$("mic").value;
+  const audio={
+   echoCancellation:false,
+   noiseSuppression:false,
+   autoGainControl:false
+  };
 
-  if (audioContext && audioContext.state !== "closed") {
-    await audioContext.close();
-  }
+  if(selected)audio.deviceId={exact:selected};
 
-  audioContext = null;
-  microphone = null;
-  source = null;
-  inputGain = null;
-  shaper = null;
-  compressor = null;
-  outputGain = null;
+  stream=await navigator.mediaDevices.getUserMedia({audio});
 
-  $("start").disabled = false;
-  $("stop").disabled = true;
-  $("mute").disabled = true;
-  muted = false;
+  await refreshMics();
 
-  $("mute").textContent = "🔇 ミュート";
-  setStatus("停止中 - マイク未接続", false);
+  ctx=new(window.AudioContext||window.webkitAudioContext)();
+  await ctx.resume();
+
+  source=ctx.createMediaStreamSource(stream);
+  input=ctx.createGain();
+  shaper=ctx.createWaveShaper();
+  outputGain=ctx.createGain();
+
+  shaper.oversample="none";
+
+  source.connect(input);
+  input.connect(shaper);
+  shaper.connect(outputGain);
+  outputGain.connect(ctx.destination);
+
+  muted=false;
+  update();
+
+  $("mute").textContent="🔇 ミュート";
+  $("stop").disabled=false;
+  $("mute").disabled=false;
+
+  status("接続中・リアルタイム変換中",true);
+
+ }catch(e){
+  console.error(e);
+  status("接続エラー："+e.message);
+  await stop();
+ }finally{
+  starting=false;
+ }
 }
 
-function toggleMute() {
-  if (!outputGain) return;
+async function stop(){
+ if(source){
+  try{source.disconnect()}catch(e){}
+ }
 
-  muted = !muted;
-  outputGain.gain.value = muted ? 0 : 0.45;
+ if(stream){
+  stream.getTracks().forEach(t=>t.stop());
+ }
 
-  $("mute").textContent = muted ? "🔊 ミュート解除" : "🔇 ミュート";
+ if(ctx && ctx.state!=="closed"){
+  await ctx.close();
+ }
+
+ ctx=null;
+ stream=null;
+ source=null;
+ input=null;
+ shaper=null;
+ outputGain=null;
+ muted=false;
+
+ $("start").disabled=false;
+ $("stop").disabled=true;
+ $("mute").disabled=true;
+ $("mute").textContent="🔇 ミュート";
+
+ status("停止中");
 }
 
-function setMode(mode) {
-  currentMode = mode;
-
-  $("crush").classList.toggle("selected", mode === "crush");
-  $("clip").classList.toggle("selected", mode === "clip");
-
-  makeCurve();
+function setMode(m){
+ mode=m;
+ $("crush").classList.toggle("selected",m==="crush");
+ $("clip").classList.toggle("selected",m==="clip");
+ makeCurve();
 }
 
-$("start").addEventListener("click", startAudio);
-$("stop").addEventListener("click", stopAudio);
-$("mute").addEventListener("click", toggleMute);
+$("start").onclick=start;
+$("stop").onclick=stop;
+$("refresh").onclick=refreshMics;
 
-$("crush").addEventListener("click", () => setMode("crush"));
-$("clip").addEventListener("click", () => setMode("clip"));
+$("mute").onclick=()=>{
+ if(!outputGain)return;
+ muted=!muted;
+ update();
+ $("mute").textContent=muted?"🔊 ミュート解除":"🔇 ミュート";
+};
 
-$("strength").addEventListener("input", updateControls);
-$("inputVolume").addEventListener("input", updateControls);
+$("crush").onclick=()=>setMode("crush");
+$("clip").onclick=()=>setMode("clip");
 
-window.addEventListener("pagehide", () => {
-  if (microphone) {
-    microphone.getTracks().forEach(track => track.stop());
-  }
-  if (audioContext && audioContext.state !== "closed") {
-    audioContext.close();
-  }
+["strength","volume","output"].forEach(id=>{
+ $(id).addEventListener("input",update);
 });
 
-updateControls();
+if(navigator.mediaDevices){
+ navigator.mediaDevices.addEventListener?.("devicechange",refreshMics);
+ refreshMics();
+}
+
+update();
 </script>
 </body>
 </html>
