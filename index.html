@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VOICE CRUSHER v6</title>
+<title>VOICE CRUSHER v6 + VIDEO DOWNLOADER</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090b12;color:white;font-family:Arial,"Noto Sans JP",sans-serif;padding:22px 14px;min-height:100vh}
@@ -37,6 +37,14 @@ select{width:100%;padding:13px;margin-top:10px;background:#20283a;color:white;bo
 .mute,.refresh{width:100%;padding:13px;margin-top:10px;border:1px solid #39435a;border-radius:10px;background:#20283a;color:white;cursor:pointer}
 .note{font-size:11px;line-height:1.9;color:#929bad}
 footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
+
+.video-panel .field{width:100%;padding:13px;margin-top:10px;background:#20283a;color:white;border:1px solid #39435a;border-radius:10px;font-size:13px}
+.video-preview{width:100%;max-height:300px;background:#05070c;border-radius:12px;margin-top:12px}
+.video-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.video-status{font-size:12px;line-height:1.7;color:#aeb6c8;margin-top:10px;overflow-wrap:anywhere}
+.video-download{background:#ff365d;color:white}
+.video-panel .btn{font-size:13px;padding:13px 8px}
+@media(max-width:380px){.video-actions{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -176,7 +184,35 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
   ChromeOSの仮想マイクとしてGeForce NOWへ直接送る機能は含まれていないよ。
  </div>
 </div>
-<footer>VOICE CRUSHER v6 © 2026</footer>
+
+<!-- VIDEO DOWNLOADER -->
+<div class="panel video-panel">
+ <h2>🎬 VIDEO DOWNLOADER</h2>
+ <p class="note">自分が所有している動画、またはダウンロード許可のある動画を保存できるよ。</p>
+
+ <label class="note" for="videoUrl">④ 動画ファイルの直接URL（MP4・WebMなど）</label>
+ <input class="field" id="videoUrl" type="url" placeholder="https://example.com/video.mp4" autocomplete="url">
+
+ <div class="video-actions">
+  <button class="btn stop" id="previewUrl" type="button">▶ URLをプレビュー</button>
+  <button class="btn video-download" id="downloadUrl" type="button">⬇ URLから保存</button>
+ </div>
+
+ <div class="note" style="margin-top:18px">⑤ 自分の動画ファイルを選択</div>
+ <input class="field" id="videoFile" type="file" accept="video/*">
+
+ <video class="video-preview" id="videoPreview" controls playsinline hidden></video>
+
+ <div class="video-actions">
+  <button class="btn stop" id="previewFile" type="button">▶ ファイルを再生</button>
+  <button class="btn video-download" id="downloadFile" type="button">⬇ ファイルを保存</button>
+ </div>
+
+ <div class="video-status" id="videoStatus" aria-live="polite">動画URLを入力するか、自分の動画ファイルを選んでね。</div>
+ <p class="note">※ URL先がCORSを許可していない場合、ブラウザから保存できないことがあるよ。サイトの制限を回避する機能ではないよ。</p>
+</div>
+
+<footer>VOICE CRUSHER v6 + VIDEO DOWNLOADER © 2026</footer>
 </div>
 
 <script>
@@ -186,7 +222,7 @@ let ctx=null,stream=null,source=null,input=null,shaper=null;
 let pitchNode=null,outputGain=null,finalCompressor=null;
 let echoDelayNode=null,echoFeedback=null,echoWet=null;
 let convolver=null,reverbWet=null;
-let filters=[],highpass=null,preCompressor=null;
+let filters=[],highpass=null,preCompressor=null,dryGain=null;
 let mode="off",muted=false,starting=false;
 let echoEnabled=false,reverbEnabled=false,noiseEnabled=true;
 let quality="natural";
@@ -379,7 +415,7 @@ async function stop(){
  if(stream)stream.getTracks().forEach(t=>t.stop());
  if(ctx&&ctx.state!=="closed")await ctx.close();
  ctx=null;stream=null;source=null;input=null;shaper=null;
- pitchNode=null;outputGain=null;finalCompressor=null;
+ pitchNode=null;outputGain=null;finalCompressor=null;dryGain=null;
  echoDelayNode=null;echoFeedback=null;echoWet=null;
  convolver=null;reverbWet=null;filters=[];
  highpass=null;preCompressor=null;
@@ -586,6 +622,133 @@ if(navigator.mediaDevices){
  refreshMics();
  navigator.mediaDevices.addEventListener?.("devicechange",refreshMics);
 }
+
+// ===== VIDEO DOWNLOADER =====
+let selectedVideoFile=null;
+let selectedVideoObjectUrl=null;
+
+function videoMessage(message){
+ $("videoStatus").textContent=message;
+}
+
+function showVideo(url){
+ const player=$("videoPreview");
+ player.src=url;
+ player.hidden=false;
+ player.load();
+}
+
+function saveBlob(blob,filename){
+ const objectUrl=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=objectUrl;
+ a.download=filename||"video";
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+}
+
+function safeFilename(value){
+ const name=(value||"video").split(/[?#]/)[0].split("/").pop()||"video";
+ return name.replace(/[\\/:*?"<>|]/g,"_").slice(0,120);
+}
+
+$("previewUrl").onclick=()=>{
+ try{
+  const url=new URL($("videoUrl").value.trim());
+  if(!["http:","https:"].includes(url.protocol))throw new Error();
+  showVideo(url.href);
+  videoMessage("URLを読み込んだよ。再生できるか確認してね。");
+ }catch(e){
+  videoMessage("有効な動画ファイルのURLを入力してね。");
+ }
+};
+
+$("downloadUrl").onclick=async()=>{
+ let url;
+ try{
+  url=new URL($("videoUrl").value.trim());
+  if(!["http:","https:"].includes(url.protocol))throw new Error();
+ }catch(e){
+  videoMessage("有効な動画ファイルのURLを入力してね。");
+  return;
+ }
+
+ const button=$("downloadUrl");
+ button.disabled=true;
+ videoMessage("動画を取得中…");
+
+ try{
+  const response=await fetch(url.href,{mode:"cors"});
+  if(!response.ok)throw new Error("HTTP "+response.status);
+
+  const blob=await response.blob();
+  if(!blob.size)throw new Error("empty file");
+
+  const type=blob.type||"";
+  if(type&&!type.startsWith("video/")&&type!=="application/octet-stream"){
+   throw new Error("not a video");
+  }
+
+  let filename=safeFilename(url.pathname);
+  if(!/\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(filename))filename+=".mp4";
+
+  saveBlob(blob,filename);
+  videoMessage("保存を開始したよ！");
+ }catch(e){
+  console.warn("Video URL download failed:",e);
+  videoMessage("取得できなかったよ。URLが動画ファイルの直接リンクか、配信元がCORSを許可しているか確認してね。");
+ }finally{
+  button.disabled=false;
+ }
+};
+
+$("videoFile").onchange=()=>{
+ const file=$("videoFile").files?.[0];
+ if(!file)return;
+
+ if(!file.type.startsWith("video/")){
+  selectedVideoFile=null;
+  videoMessage("動画ファイルを選んでね。");
+  return;
+ }
+
+ selectedVideoFile=file;
+
+ if(selectedVideoObjectUrl){
+  URL.revokeObjectURL(selectedVideoObjectUrl);
+ }
+
+ selectedVideoObjectUrl=URL.createObjectURL(file);
+ showVideo(selectedVideoObjectUrl);
+
+ videoMessage("選択中："+file.name);
+};
+
+$("previewFile").onclick=()=>{
+ if(!selectedVideoFile){
+  videoMessage("先に動画ファイルを選んでね。");
+  return;
+ }
+
+ showVideo(selectedVideoObjectUrl);
+ $("videoPreview").play().catch(()=>videoMessage("再生ボタンを押してね。"));
+};
+
+$("downloadFile").onclick=()=>{
+ if(!selectedVideoFile){
+  videoMessage("先に動画ファイルを選んでね。");
+  return;
+ }
+
+ saveBlob(selectedVideoFile,selectedVideoFile.name);
+ videoMessage("保存を開始したよ！");
+};
+
+window.addEventListener("beforeunload",()=>{
+ if(selectedVideoObjectUrl)URL.revokeObjectURL(selectedVideoObjectUrl);
+});
 </script>
 </body>
 </html>
