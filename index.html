@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VOICE CRUSHER v4</title>
+<title>VOICE CRUSHER v5</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090b12;color:white;font-family:Arial,"Noto Sans JP",sans-serif;padding:22px 14px;min-height:100vh}
@@ -23,7 +24,7 @@ h2{font-size:15px;margin:0 0 17px}
 .choice.selected{border-color:#ff365d;background:#381b2a;color:#ff6682}
 .choice small{display:block;font-size:10px;color:#9ca5b7;margin-top:7px}
 .control{margin:23px 0}
-.top{display:flex;justify-content:space-between;font-size:13px}
+.top{display:flex;justify-content:space-between;font-size:13px;gap:8px}
 .val{color:#ff5878;font-weight:bold}
 input[type=range]{width:100%;accent-color:#ff365d;margin-top:15px}
 .scale{display:flex;justify-content:space-between;color:#858da0;font-size:10px}
@@ -42,7 +43,7 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 <div class="app">
 <header>
  <div class="logo">VOICE <span>CRUSHER</span></div>
- <div class="sub">REALTIME VOICE CHANGER v4</div>
+ <div class="sub">NATURAL VOICE CHANGER v5</div>
 </header>
 
 <div class="panel">
@@ -57,29 +58,44 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 </div>
 
 <div class="panel">
- <h2>🗣 声のタイプ</h2>
+ <h2>✨ 声のスタイル</h2>
  <div class="grid">
-  <button class="choice" id="male">👨 男性風<small>低めの声</small></button>
-  <button class="choice" id="female">👩 女性風<small>高めの声</small></button>
-  <button class="choice selected" id="normal">🎙 元の声<small>変換なし</small></button>
+  <button class="choice" id="male">👦 中性的<small>少年っぽい響き</small></button>
+  <button class="choice" id="female">🎀 明るめ<small>高めで柔らかい</small></button>
+  <button class="choice selected" id="mix">🍬 ミックス<small>3つの特徴をミックス</small></button>
  </div>
  <div class="control">
-  <div class="top"><span>声の高さ</span><span class="val" id="pitchVal">0 半音</span></div>
-  <input type="range" id="pitch" min="-12" max="12" value="0">
+  <div class="top"><span>声の高さ</span><span class="val" id="pitchVal">+3 半音</span></div>
+  <input type="range" id="pitch" min="-12" max="12" value="3">
   <div class="scale"><span>低い -12</span><span>元の声</span><span>高い +12</span></div>
  </div>
+ <div class="control">
+  <div class="top"><span>声の響き（フォルマント風調整）</span><span class="val" id="formantVal">55%</span></div>
+  <input type="range" id="formant" min="0" max="100" value="55">
+  <div class="scale"><span>落ち着いた</span><span>明るく柔らかい</span></div>
+ </div>
+ <p class="note">※響きの調整はEQによる近似表現だよ。本格的なフォルマント変換とは異なるよ。</p>
+</div>
+
+<div class="panel">
+ <h2>🎙 ノイズ抑制</h2>
+ <div class="grid two">
+  <button class="choice selected" id="noiseOn">✨ ON</button>
+  <button class="choice" id="noiseOff">OFF</button>
+ </div>
+ <p class="note">マイクに入る環境音を抑える設定だよ。マイクによって効果は変わるよ。</p>
 </div>
 
 <div class="panel">
  <h2>⚡ 音割れエフェクト</h2>
  <div class="grid">
-  <button class="choice selected" id="crush">🔊 バリバリ<small>ブツブツ・ザラザラ</small></button>
+  <button class="choice" id="crush">🔊 バリバリ<small>ブツブツ・ザラザラ</small></button>
   <button class="choice" id="clip">📢 マイク音割れ<small>強いクリッピング</small></button>
-  <button class="choice" id="off">✨ OFF<small>音割れなし</small></button>
+  <button class="choice selected" id="off">✨ OFF<small>自然な音</small></button>
  </div>
  <div class="control">
-  <div class="top"><span>音割れの強さ</span><span class="val" id="strengthVal">75%</span></div>
-  <input type="range" id="strength" min="0" max="100" value="75">
+  <div class="top"><span>音割れの強さ</span><span class="val" id="strengthVal">0%</span></div>
+  <input type="range" id="strength" min="0" max="100" value="0">
   <div class="scale"><span>弱い</span><span>強い</span></div>
  </div>
 </div>
@@ -87,31 +103,28 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 <div class="panel">
  <h2>🔁 エコー（やまびこ）</h2>
  <div class="grid two">
-  <button class="choice selected" id="echoOn">🔊 エコー ON</button>
-  <button class="choice" id="echoOff">OFF</button>
+  <button class="choice" id="echoOn">🔊 エコー ON</button>
+  <button class="choice selected" id="echoOff">OFF</button>
  </div>
  <div class="control">
-  <div class="top"><span>エコーの強さ</span><span class="val" id="echoStrengthVal">35%</span></div>
-  <input type="range" id="echoStrength" min="0" max="80" value="35">
-  <div class="scale"><span>弱い</span><span>強い</span></div>
+  <div class="top"><span>エコーの強さ</span><span class="val" id="echoStrengthVal">15%</span></div>
+  <input type="range" id="echoStrength" min="0" max="80" value="15">
  </div>
  <div class="control">
   <div class="top"><span>反響する間隔</span><span class="val" id="echoDelayVal">350 ms</span></div>
   <input type="range" id="echoDelay" min="100" max="1000" step="10" value="350">
-  <div class="scale"><span>短い</span><span>長い</span></div>
  </div>
 </div>
 
 <div class="panel">
  <h2>🌌 リバーブ（空間の響き）</h2>
  <div class="grid two">
-  <button class="choice selected" id="reverbOn">🌌 リバーブ ON</button>
-  <button class="choice" id="reverbOff">OFF</button>
+  <button class="choice" id="reverbOn">🌌 リバーブ ON</button>
+  <button class="choice selected" id="reverbOff">OFF</button>
  </div>
  <div class="control">
-  <div class="top"><span>残響の強さ</span><span class="val" id="reverbStrengthVal">30%</span></div>
-  <input type="range" id="reverbStrength" min="0" max="100" value="30">
-  <div class="scale"><span>少ない</span><span>広い・強い</span></div>
+  <div class="top"><span>残響の強さ</span><span class="val" id="reverbStrengthVal">15%</span></div>
+  <input type="range" id="reverbStrength" min="0" max="100" value="15">
  </div>
 </div>
 
@@ -141,10 +154,10 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
  <div class="note">
   ① マイクを選択<br>
   ② 開始を押してマイクを許可<br>
-  ③ 声のタイプを選択<br>
-  ④ 音割れ・エコー・リバーブを調整<br>
+  ③ 「ミックス」を選択<br>
+  ④ 声の高さと響きを調整<br>
   ⑤ イヤホンで変換後の声を聞く<br><br>
-  ※ イヤホンを使うとハウリングを防ぎやすいよ。
+  ※ 音量は小さめから調整してね。
  </div>
 </div>
 
@@ -152,21 +165,22 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
  <h2>⚠️ GeForce NOWについて</h2>
  <div class="note">
   このサイトはブラウザ内でリアルタイム変換した声を再生するよ。<br>
-  GeForce NOWの仮想マイクとして直接送信する機能はまだ含まれていないよ。
+  ChromeOSの仮想マイクとしてGeForce NOWへ直接送信する機能は含まれていないよ。
  </div>
 </div>
-<footer>VOICE CRUSHER v4 © 2026</footer>
+<footer>VOICE CRUSHER v5 © 2026</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
 
 let ctx=null,stream=null,source=null,input=null,shaper=null;
-let pitchNode=null,outputGain=null;
+let pitchNode=null,outputGain=null,compressor=null;
 let echoDelayNode=null,echoFeedback=null,echoWet=null;
 let convolver=null,reverbWet=null,dryGain=null;
-let mode="crush",muted=false,starting=false;
-let echoEnabled=true,reverbEnabled=true;
+let filters=[];
+let mode="off",muted=false,starting=false;
+let echoEnabled=false,reverbEnabled=false,noiseEnabled=true;
 
 function setStatus(message,on=false){
  $("status").textContent=message;
@@ -178,38 +192,60 @@ class PitchProcessor extends AudioWorkletProcessor{
  constructor(){
   super();
   this.size=sampleRate*2;
-  this.buffers=[new Float32Array(this.size),new Float32Array(this.size)];
-  this.write=0;this.phase=0;this.ratio=1;
-  this.period=.10;this.baseDelay=.12;
-  this.port.onmessage=e=>{this.ratio=Math.pow(2,e.data.semitones/12)};
+  this.buffers=[];
+  this.write=0;
+  this.phase=0;
+  this.ratio=1;
+  this.targetRatio=1;
+  this.range=Math.floor(sampleRate*.10);
+  this.base=Math.floor(sampleRate*.005);
+  this.port.onmessage=e=>{
+   if(Number.isFinite(e.data.semitones)){
+    this.targetRatio=Math.pow(2,e.data.semitones/12);
+   }
+  };
  }
- read(buffer,position){
-  position=(position%this.size+this.size)%this.size;
-  const i=Math.floor(position),f=position-i,j=(i+1)%this.size;
+ read(buffer,delay){
+  let pos=this.write-delay;
+  while(pos<0)pos+=this.size;
+  pos%=this.size;
+  const i=Math.floor(pos);
+  const j=(i+1)%this.size;
+  const f=pos-i;
   return buffer[i]*(1-f)+buffer[j]*f;
  }
  process(inputs,outputs){
   const input=inputs[0],output=outputs[0];
   if(!input||!input.length||!input[0].length){
-   for(const channel of output)channel.fill(0);
+   for(const ch of output)ch.fill(0);
    return true;
   }
   for(let i=0;i<output[0].length;i++){
-   const p=this.phase,p2=(p+.5)%1;
-   const d1=this.baseDelay+(1-this.ratio)*this.period*p;
-   const d2=this.baseDelay+(1-this.ratio)*this.period*p2;
-   const w1=(1-Math.cos(2*Math.PI*p))/2,w2=1-w1;
-   for(let c=0;c<output.length;c++){
-    const sample=input[Math.min(c,input.length-1)][i]||0;
-    const buffer=this.buffers[Math.min(c,1)];
+   this.ratio+=(this.targetRatio-this.ratio)*.0015;
+   const shift=Math.abs(1-this.ratio);
+   const bypass=shift<.0005;
+   for(let ch=0;ch<output.length;ch++){
+    if(!this.buffers[ch])this.buffers[ch]=new Float32Array(this.size);
+    const buffer=this.buffers[ch];
+    const src=input[Math.min(ch,input.length-1)];
+    const sample=src?src[i]||0:0;
     buffer[this.write]=sample;
-    output[c][i]=Math.abs(this.ratio-1)<.001?sample:
-     this.read(buffer,this.write-d1*sampleRate)*w1+
-     this.read(buffer,this.write-d2*sampleRate)*w2;
+    if(bypass){
+     output[ch][i]=sample;
+    }else{
+     const p1=this.phase;
+     const p2=(p1+.5)%1;
+     const d1=this.base+(this.ratio>1?(1-p1):p1)*this.range;
+     const d2=this.base+(this.ratio>1?(1-p2):p2)*this.range;
+     const w1=.5-.5*Math.cos(2*Math.PI*p1);
+     const w2=.5-.5*Math.cos(2*Math.PI*p2);
+     const a=this.read(buffer,d1);
+     const b=this.read(buffer,d2);
+     output[ch][i]=(a*w1+b*w2)/Math.max(.0001,w1+w2);
+    }
    }
+   if(!bypass)this.phase=(this.phase+shift/this.range)%1;
    this.write=(this.write+1)%this.size;
-   this.phase+=1/(this.period*sampleRate);
-   if(this.phase>=1)this.phase-=1;
   }
   return true;
  }
@@ -246,11 +282,29 @@ function setPitch(value){
  if(pitchNode)pitchNode.port.postMessage({semitones:Number(value)});
 }
 
+function setFormant(value){
+ $("formant").value=value;
+ $("formantVal").textContent=value+"%";
+ if(!filters.length)return;
+ const amount=(Number(value)-50)/50;
+ filters[0].gain.value=-amount*2.5;
+ filters[1].gain.value=amount*3.5;
+ filters[2].gain.value=amount*2.5;
+ filters[3].gain.value=amount*1.5;
+}
+
 function setPreset(type){
- ["male","female","normal"].forEach(id=>$(id).classList.toggle("selected",id===type));
- if(type==="male")setPitch(-4);
- if(type==="female")setPitch(4);
- if(type==="normal")setPitch(0);
+ ["male","female","mix"].forEach(id=>$(id).classList.toggle("selected",id===type));
+ if(type==="male"){
+  setPitch(-2);
+  setFormant(35);
+ }else if(type==="female"){
+  setPitch(5);
+  setFormant(70);
+ }else{
+  setPitch(3);
+  setFormant(55);
+ }
 }
 
 function setMode(type){
@@ -261,13 +315,12 @@ function setMode(type){
 
 function makeImpulse(){
  const rate=ctx.sampleRate;
- const duration=2.5;
- const length=Math.floor(rate*duration);
+ const length=Math.floor(rate*1.8);
  const buffer=ctx.createBuffer(2,length,rate);
  for(let channel=0;channel<2;channel++){
   const data=buffer.getChannelData(channel);
   for(let i=0;i<length;i++){
-   const fade=Math.pow(1-i/length,2.5);
+   const fade=Math.pow(1-i/length,3);
    data[i]=(Math.random()*2-1)*fade;
   }
  }
@@ -284,10 +337,9 @@ function update(){
 
  if(input)input.gain.value=Number($("volume").value)/100;
  if(outputGain)outputGain.gain.value=muted?0:Number($("output").value)/100;
-
  if(echoDelayNode)echoDelayNode.delayTime.value=Number($("echoDelay").value)/1000;
  if(echoWet)echoWet.gain.value=echoEnabled?Number($("echoStrength").value)/100:0;
- if(echoFeedback)echoFeedback.gain.value=echoEnabled?Math.min(.72,Number($("echoStrength").value)/130):0;
+ if(echoFeedback)echoFeedback.gain.value=echoEnabled?Math.min(.65,Number($("echoStrength").value)/150):0;
  if(reverbWet)reverbWet.gain.value=reverbEnabled?Number($("reverbStrength").value)/100:0;
  makeCurve();
 }
@@ -311,8 +363,9 @@ async function stop(){
  if(stream)stream.getTracks().forEach(t=>t.stop());
  if(ctx&&ctx.state!=="closed")await ctx.close();
  ctx=null;stream=null;source=null;input=null;shaper=null;
- pitchNode=null;outputGain=null;echoDelayNode=null;
- echoFeedback=null;echoWet=null;convolver=null;reverbWet=null;dryGain=null;
+ pitchNode=null;outputGain=null;compressor=null;
+ echoDelayNode=null;echoFeedback=null;echoWet=null;
+ convolver=null;reverbWet=null;dryGain=null;filters=[];
  muted=false;
  $("start").disabled=false;
  $("stop").disabled=true;
@@ -329,7 +382,11 @@ async function start(){
  try{
   if(!navigator.mediaDevices?.getUserMedia)throw new Error("マイクを使えません。HTTPSで開いてください。");
   const device=$("mic").value;
-  const audio={echoCancellation:false,noiseSuppression:false,autoGainControl:false};
+  const audio={
+   echoCancellation:false,
+   noiseSuppression:noiseEnabled,
+   autoGainControl:false
+  };
   if(device)audio.deviceId={exact:device};
   stream=await navigator.mediaDevices.getUserMedia({audio});
   ctx=new(window.AudioContext||window.webkitAudioContext)();
@@ -344,43 +401,67 @@ async function start(){
   source=ctx.createMediaStreamSource(stream);
   input=ctx.createGain();
   shaper=ctx.createWaveShaper();
-  pitchNode=new AudioWorkletNode(ctx,"voice-pitch");
+  pitchNode=new AudioWorkletNode(ctx,"voice-pitch",{
+   outputChannelCount:[2]
+  });
   dryGain=ctx.createGain();
   outputGain=ctx.createGain();
+  compressor=ctx.createDynamicsCompressor();
+
+  compressor.threshold.value=-20;
+  compressor.knee.value=18;
+  compressor.ratio.value=3;
+  compressor.attack.value=.005;
+  compressor.release.value=.15;
+
+  const frequencies=[250,1000,2800,4500];
+  const types=["lowshelf","peaking","peaking","highshelf"];
+  filters=frequencies.map((freq,i)=>{
+   const f=ctx.createBiquadFilter();
+   f.type=types[i];
+   f.frequency.value=freq;
+   f.Q.value=i===1||i===2?1.0:.7;
+   f.gain.value=0;
+   return f;
+  });
 
   echoDelayNode=ctx.createDelay(2);
   echoFeedback=ctx.createGain();
   echoWet=ctx.createGain();
-
   convolver=ctx.createConvolver();
   convolver.buffer=makeImpulse();
   reverbWet=ctx.createGain();
 
-  shaper.oversample="none";
+  shaper.oversample="4x";
 
   source.connect(input);
   input.connect(shaper);
   shaper.connect(pitchNode);
 
-  // 原音
-  pitchNode.connect(dryGain);
-  dryGain.connect(outputGain);
+  let chain=pitchNode;
+  filters.forEach(f=>{
+   chain.connect(f);
+   chain=f;
+  });
 
-  // エコー
-  pitchNode.connect(echoDelayNode);
+  chain.connect(dryGain);
+  dryGain.connect(compressor);
+  compressor.connect(outputGain);
+
+  chain.connect(echoDelayNode);
   echoDelayNode.connect(echoFeedback);
   echoFeedback.connect(echoDelayNode);
   echoDelayNode.connect(echoWet);
   echoWet.connect(outputGain);
 
-  // リバーブ
-  pitchNode.connect(convolver);
+  chain.connect(convolver);
   convolver.connect(reverbWet);
   reverbWet.connect(outputGain);
 
   outputGain.connect(ctx.destination);
 
   setPitch(Number($("pitch").value));
+  setFormant(Number($("formant").value));
   update();
 
   muted=false;
@@ -393,7 +474,9 @@ async function start(){
   console.error(e);
   await stop();
   setStatus("エラー："+e.message);
- }finally{starting=false}
+ }finally{
+  starting=false;
+ }
 }
 
 $("start").onclick=start;
@@ -409,16 +492,42 @@ $("mute").onclick=()=>{
 
 $("male").onclick=()=>setPreset("male");
 $("female").onclick=()=>setPreset("female");
-$("normal").onclick=()=>setPreset("normal");
+$("mix").onclick=()=>setPreset("mix");
 
 $("crush").onclick=()=>setMode("crush");
 $("clip").onclick=()=>setMode("clip");
 $("off").onclick=()=>setMode("off");
 
 $("pitch").addEventListener("input",()=>{
- ["male","female","normal"].forEach(id=>$(id).classList.remove("selected"));
+ ["male","female","mix"].forEach(id=>$(id).classList.remove("selected"));
  setPitch(Number($("pitch").value));
 });
+
+$("formant").addEventListener("input",()=>{
+ setFormant(Number($("formant").value));
+});
+
+$("noiseOn").onclick=()=>{
+ noiseEnabled=true;
+ $("noiseOn").classList.add("selected");
+ $("noiseOff").classList.remove("selected");
+ if(stream){
+  stream.getAudioTracks().forEach(t=>{
+   t.applyConstraints({noiseSuppression:true}).catch(()=>{});
+  });
+ }
+};
+
+$("noiseOff").onclick=()=>{
+ noiseEnabled=false;
+ $("noiseOff").classList.add("selected");
+ $("noiseOn").classList.remove("selected");
+ if(stream){
+  stream.getAudioTracks().forEach(t=>{
+   t.applyConstraints({noiseSuppression:false}).catch(()=>{});
+  });
+ }
+};
 
 $("echoOn").onclick=()=>{
  echoEnabled=true;
