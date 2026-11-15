@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VOICE CRUSHER v5</title>
+<title>VOICE CRUSHER v6</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090b12;color:white;font-family:Arial,"Noto Sans JP",sans-serif;padding:22px 14px;min-height:100vh}
@@ -43,7 +43,7 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 <div class="app">
 <header>
  <div class="logo">VOICE <span>CRUSHER</span></div>
- <div class="sub">NATURAL VOICE CHANGER v5</div>
+ <div class="sub">HIGH QUALITY VOICE CHANGER v6</div>
 </header>
 
 <div class="panel">
@@ -62,7 +62,7 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
  <div class="grid">
   <button class="choice" id="male">👦 中性的<small>少年っぽい響き</small></button>
   <button class="choice" id="female">🎀 明るめ<small>高めで柔らかい</small></button>
-  <button class="choice selected" id="mix">🍬 ミックス<small>3つの特徴をミックス</small></button>
+  <button class="choice selected" id="mix">🍬 ミックス<small>自然なミックス</small></button>
  </div>
  <div class="control">
   <div class="top"><span>声の高さ</span><span class="val" id="pitchVal">+3 半音</span></div>
@@ -70,40 +70,48 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
   <div class="scale"><span>低い -12</span><span>元の声</span><span>高い +12</span></div>
  </div>
  <div class="control">
-  <div class="top"><span>声の響き（フォルマント風調整）</span><span class="val" id="formantVal">55%</span></div>
+  <div class="top"><span>声の響き</span><span class="val" id="formantVal">55%</span></div>
   <input type="range" id="formant" min="0" max="100" value="55">
   <div class="scale"><span>落ち着いた</span><span>明るく柔らかい</span></div>
  </div>
- <p class="note">※響きの調整はEQによる近似表現だよ。本格的なフォルマント変換とは異なるよ。</p>
 </div>
 
 <div class="panel">
- <h2>🎙 ノイズ抑制</h2>
+ <h2>🎚 音質モード</h2>
+ <div class="grid">
+  <button class="choice selected" id="natural">🌸 自然<small>標準・聞きやすい</small></button>
+  <button class="choice" id="clear">✨ クリア<small>声を明瞭に</small></button>
+  <button class="choice" id="warm">☁️ まろやか<small>柔らかい音</small></button>
+ </div>
+ <p class="note">声の高さやスタイルとは別に、音の明るさ・低音を調整するよ。</p>
+</div>
+
+<div class="panel">
+ <h2>🔇 ノイズ抑制</h2>
  <div class="grid two">
   <button class="choice selected" id="noiseOn">✨ ON</button>
   <button class="choice" id="noiseOff">OFF</button>
  </div>
- <p class="note">マイクに入る環境音を抑える設定だよ。マイクによって効果は変わるよ。</p>
+ <p class="note">マイクの環境音を抑える機能。マイクやブラウザによって効果は変わるよ。</p>
 </div>
 
 <div class="panel">
  <h2>⚡ 音割れエフェクト</h2>
  <div class="grid">
-  <button class="choice" id="crush">🔊 バリバリ<small>ブツブツ・ザラザラ</small></button>
-  <button class="choice" id="clip">📢 マイク音割れ<small>強いクリッピング</small></button>
-  <button class="choice selected" id="off">✨ OFF<small>自然な音</small></button>
+  <button class="choice" id="crush">🔊 バリバリ</button>
+  <button class="choice" id="clip">📢 音割れ</button>
+  <button class="choice selected" id="off">✨ OFF</button>
  </div>
  <div class="control">
   <div class="top"><span>音割れの強さ</span><span class="val" id="strengthVal">0%</span></div>
   <input type="range" id="strength" min="0" max="100" value="0">
-  <div class="scale"><span>弱い</span><span>強い</span></div>
  </div>
 </div>
 
 <div class="panel">
- <h2>🔁 エコー（やまびこ）</h2>
+ <h2>🔁 エコー</h2>
  <div class="grid two">
-  <button class="choice" id="echoOn">🔊 エコー ON</button>
+  <button class="choice" id="echoOn">🔊 ON</button>
   <button class="choice selected" id="echoOff">OFF</button>
  </div>
  <div class="control">
@@ -117,9 +125,9 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
 </div>
 
 <div class="panel">
- <h2>🌌 リバーブ（空間の響き）</h2>
+ <h2>🌌 リバーブ</h2>
  <div class="grid two">
-  <button class="choice" id="reverbOn">🌌 リバーブ ON</button>
+  <button class="choice" id="reverbOn">🌌 ON</button>
   <button class="choice selected" id="reverbOff">OFF</button>
  </div>
  <div class="control">
@@ -154,38 +162,34 @@ footer{text-align:center;color:#626b7d;font-size:11px;padding:15px}
  <div class="note">
   ① マイクを選択<br>
   ② 開始を押してマイクを許可<br>
-  ③ 「ミックス」を選択<br>
-  ④ 声の高さと響きを調整<br>
-  ⑤ イヤホンで変換後の声を聞く<br><br>
-  ※ 音量は小さめから調整してね。
+  ③ ミックスを選択<br>
+  ④ 音質モードを選択<br>
+  ⑤ イヤホンで確認しながら調整<br><br>
+  ※ 音が割れるときは入力音量を下げてね。
  </div>
 </div>
 
 <div class="panel">
  <h2>⚠️ GeForce NOWについて</h2>
  <div class="note">
-  このサイトはブラウザ内でリアルタイム変換した声を再生するよ。<br>
-  ChromeOSの仮想マイクとしてGeForce NOWへ直接送信する機能は含まれていないよ。
+  変換した音声はこのページ内で再生されるよ。<br>
+  ChromeOSの仮想マイクとしてGeForce NOWへ直接送る機能は含まれていないよ。
  </div>
 </div>
-<footer>VOICE CRUSHER v5 © 2026</footer>
+<footer>VOICE CRUSHER v6 © 2026</footer>
 </div>
 
 <script>
 const $=id=>document.getElementById(id);
 
 let ctx=null,stream=null,source=null,input=null,shaper=null;
-let pitchNode=null,outputGain=null,compressor=null;
+let pitchNode=null,outputGain=null,finalCompressor=null;
 let echoDelayNode=null,echoFeedback=null,echoWet=null;
-let convolver=null,reverbWet=null,dryGain=null;
-let filters=[];
+let convolver=null,reverbWet=null;
+let filters=[],highpass=null,preCompressor=null;
 let mode="off",muted=false,starting=false;
 let echoEnabled=false,reverbEnabled=false,noiseEnabled=true;
-
-function setStatus(message,on=false){
- $("status").textContent=message;
- $("dot").classList.toggle("on",on);
-}
+let quality="natural";
 
 const pitchProcessor=`
 class PitchProcessor extends AudioWorkletProcessor{
@@ -209,9 +213,7 @@ class PitchProcessor extends AudioWorkletProcessor{
   let pos=this.write-delay;
   while(pos<0)pos+=this.size;
   pos%=this.size;
-  const i=Math.floor(pos);
-  const j=(i+1)%this.size;
-  const f=pos-i;
+  const i=Math.floor(pos),j=(i+1)%this.size,f=pos-i;
   return buffer[i]*(1-f)+buffer[j]*f;
  }
  process(inputs,outputs){
@@ -230,18 +232,17 @@ class PitchProcessor extends AudioWorkletProcessor{
     const src=input[Math.min(ch,input.length-1)];
     const sample=src?src[i]||0:0;
     buffer[this.write]=sample;
-    if(bypass){
-     output[ch][i]=sample;
-    }else{
-     const p1=this.phase;
-     const p2=(p1+.5)%1;
+    if(bypass)output[ch][i]=sample;
+    else{
+     const p1=this.phase,p2=(p1+.5)%1;
      const d1=this.base+(this.ratio>1?(1-p1):p1)*this.range;
      const d2=this.base+(this.ratio>1?(1-p2):p2)*this.range;
      const w1=.5-.5*Math.cos(2*Math.PI*p1);
      const w2=.5-.5*Math.cos(2*Math.PI*p2);
-     const a=this.read(buffer,d1);
-     const b=this.read(buffer,d2);
-     output[ch][i]=(a*w1+b*w2)/Math.max(.0001,w1+w2);
+     output[ch][i]=(
+      this.read(buffer,d1)*w1+
+      this.read(buffer,d2)*w2
+     )/Math.max(.0001,w1+w2);
     }
    }
    if(!bypass)this.phase=(this.phase+shift/this.range)%1;
@@ -253,27 +254,9 @@ class PitchProcessor extends AudioWorkletProcessor{
 registerProcessor("voice-pitch",PitchProcessor);
 `;
 
-function makeCurve(){
- if(!shaper)return;
- const amount=Number($("strength").value)/100;
- const curve=new Float32Array(44100);
- for(let i=0;i<curve.length;i++){
-  const x=i*2/(curve.length-1)-1;
-  let y=x;
-  if(mode==="crush"){
-   const drive=1+amount*24;
-   const levels=Math.max(3,Math.round(32-amount*29));
-   const v=Math.max(-1,Math.min(1,x*drive));
-   y=Math.round(v*levels)/levels;
-  }else if(mode==="clip"){
-   const drive=1+amount*30;
-   const threshold=1-amount*.90;
-   y=Math.max(-threshold,Math.min(threshold,x*drive));
-   y/=Math.max(threshold,.1);
-  }
-  curve[i]=y;
- }
- shaper.curve=curve;
+function setStatus(message,on=false){
+ $("status").textContent=message;
+ $("dot").classList.toggle("on",on);
 }
 
 function setPitch(value){
@@ -285,26 +268,14 @@ function setPitch(value){
 function setFormant(value){
  $("formant").value=value;
  $("formantVal").textContent=value+"%";
- if(!filters.length)return;
- const amount=(Number(value)-50)/50;
- filters[0].gain.value=-amount*2.5;
- filters[1].gain.value=amount*3.5;
- filters[2].gain.value=amount*2.5;
- filters[3].gain.value=amount*1.5;
+ updateEQ();
 }
 
 function setPreset(type){
  ["male","female","mix"].forEach(id=>$(id).classList.toggle("selected",id===type));
- if(type==="male"){
-  setPitch(-2);
-  setFormant(35);
- }else if(type==="female"){
-  setPitch(5);
-  setFormant(70);
- }else{
-  setPitch(3);
-  setFormant(55);
- }
+ if(type==="male"){setPitch(-2);setFormant(35)}
+ if(type==="female"){setPitch(5);setFormant(70)}
+ if(type==="mix"){setPitch(3);setFormant(55)}
 }
 
 function setMode(type){
@@ -313,15 +284,58 @@ function setMode(type){
  makeCurve();
 }
 
+function makeCurve(){
+ if(!shaper)return;
+ const amount=Number($("strength").value)/100;
+ const curve=new Float32Array(44100);
+ for(let i=0;i<curve.length;i++){
+  const x=i*2/(curve.length-1)-1;
+  let y=x;
+  if(mode==="crush"){
+   const drive=1+amount*24;
+   const levels=Math.max(3,Math.round(32-amount*29));
+   y=Math.round(Math.max(-1,Math.min(1,x*drive))*levels)/levels;
+  }else if(mode==="clip"){
+   const drive=1+amount*30;
+   const threshold=1-amount*.90;
+   y=Math.max(-threshold,Math.min(threshold,x*drive));
+   y/=Math.max(threshold,.1);
+  }
+  curve[i]=y;
+ }
+ shaper.curve=curve;
+}
+
+function updateEQ(){
+ if(!filters.length)return;
+ const form=(Number($("formant").value)-50)/50;
+ let low=0,mid=0,high=0;
+ if(quality==="natural"){
+  low=-1;mid=1;high=.5;
+ }else if(quality==="clear"){
+  low=-2;mid=2.5;high=2;
+ }else if(quality==="warm"){
+  low=1.5;mid=-.5;high=-1.5;
+ }
+ filters[0].gain.setTargetAtTime(low,ctx.currentTime,.04);
+ filters[1].gain.setTargetAtTime(mid+form*1.5,ctx.currentTime,.04);
+ filters[2].gain.setTargetAtTime(high+form*2,ctx.currentTime,.04);
+}
+
+function setQuality(type){
+ quality=type;
+ ["natural","clear","warm"].forEach(id=>$(id).classList.toggle("selected",id===type));
+ updateEQ();
+}
+
 function makeImpulse(){
  const rate=ctx.sampleRate;
  const length=Math.floor(rate*1.8);
  const buffer=ctx.createBuffer(2,length,rate);
- for(let channel=0;channel<2;channel++){
-  const data=buffer.getChannelData(channel);
+ for(let c=0;c<2;c++){
+  const data=buffer.getChannelData(c);
   for(let i=0;i<length;i++){
-   const fade=Math.pow(1-i/length,3);
-   data[i]=(Math.random()*2-1)*fade;
+   data[i]=(Math.random()*2-1)*Math.pow(1-i/length,3);
   }
  }
  return buffer;
@@ -335,12 +349,14 @@ function update(){
  $("echoDelayVal").textContent=$("echoDelay").value+" ms";
  $("reverbStrengthVal").textContent=$("reverbStrength").value+"%";
 
- if(input)input.gain.value=Number($("volume").value)/100;
- if(outputGain)outputGain.gain.value=muted?0:Number($("output").value)/100;
- if(echoDelayNode)echoDelayNode.delayTime.value=Number($("echoDelay").value)/1000;
- if(echoWet)echoWet.gain.value=echoEnabled?Number($("echoStrength").value)/100:0;
- if(echoFeedback)echoFeedback.gain.value=echoEnabled?Math.min(.65,Number($("echoStrength").value)/150):0;
- if(reverbWet)reverbWet.gain.value=reverbEnabled?Number($("reverbStrength").value)/100:0;
+ if(!ctx)return;
+ const now=ctx.currentTime;
+ if(input)input.gain.setTargetAtTime(Number($("volume").value)/100,now,.03);
+ if(outputGain)outputGain.gain.setTargetAtTime(muted?0:Number($("output").value)/100,now,.03);
+ if(echoDelayNode)echoDelayNode.delayTime.setTargetAtTime(Number($("echoDelay").value)/1000,now,.03);
+ if(echoWet)echoWet.gain.setTargetAtTime(echoEnabled?Number($("echoStrength").value)/100:0,now,.03);
+ if(echoFeedback)echoFeedback.gain.setTargetAtTime(echoEnabled?Math.min(.55,Number($("echoStrength").value)/150):0,now,.03);
+ if(reverbWet)reverbWet.gain.setTargetAtTime(reverbEnabled?Number($("reverbStrength").value)/100:0,now,.03);
  makeCurve();
 }
 
@@ -363,9 +379,10 @@ async function stop(){
  if(stream)stream.getTracks().forEach(t=>t.stop());
  if(ctx&&ctx.state!=="closed")await ctx.close();
  ctx=null;stream=null;source=null;input=null;shaper=null;
- pitchNode=null;outputGain=null;compressor=null;
+ pitchNode=null;outputGain=null;finalCompressor=null;
  echoDelayNode=null;echoFeedback=null;echoWet=null;
- convolver=null;reverbWet=null;dryGain=null;filters=[];
+ convolver=null;reverbWet=null;filters=[];
+ highpass=null;preCompressor=null;
  muted=false;
  $("start").disabled=false;
  $("stop").disabled=true;
@@ -381,16 +398,20 @@ async function start(){
  setStatus("接続中...");
  try{
   if(!navigator.mediaDevices?.getUserMedia)throw new Error("マイクを使えません。HTTPSで開いてください。");
+
   const device=$("mic").value;
   const audio={
    echoCancellation:false,
    noiseSuppression:noiseEnabled,
-   autoGainControl:false
+   autoGainControl:false,
+   channelCount:1
   };
   if(device)audio.deviceId={exact:device};
+
   stream=await navigator.mediaDevices.getUserMedia({audio});
-  ctx=new(window.AudioContext||window.webkitAudioContext)();
+  ctx=new(window.AudioContext||window.webkitAudioContext)({latencyHint:"interactive"});
   await ctx.resume();
+
   if(!ctx.audioWorklet)throw new Error("このブラウザではピッチ変換を利用できません。");
 
   const blob=new Blob([pitchProcessor],{type:"text/javascript"});
@@ -400,31 +421,33 @@ async function start(){
 
   source=ctx.createMediaStreamSource(stream);
   input=ctx.createGain();
+  highpass=ctx.createBiquadFilter();
+  highpass.type="highpass";
+  highpass.frequency.value=80;
+  highpass.Q.value=.7;
+
+  preCompressor=ctx.createDynamicsCompressor();
+  preCompressor.threshold.value=-24;
+  preCompressor.knee.value=20;
+  preCompressor.ratio.value=2;
+  preCompressor.attack.value=.01;
+  preCompressor.release.value=.18;
+
   shaper=ctx.createWaveShaper();
-  pitchNode=new AudioWorkletNode(ctx,"voice-pitch",{
-   outputChannelCount:[2]
-  });
-  dryGain=ctx.createGain();
-  outputGain=ctx.createGain();
-  compressor=ctx.createDynamicsCompressor();
+  shaper.oversample="4x";
 
-  compressor.threshold.value=-20;
-  compressor.knee.value=18;
-  compressor.ratio.value=3;
-  compressor.attack.value=.005;
-  compressor.release.value=.15;
+  pitchNode=new AudioWorkletNode(ctx,"voice-pitch",{outputChannelCount:[2]});
 
-  const frequencies=[250,1000,2800,4500];
-  const types=["lowshelf","peaking","peaking","highshelf"];
-  filters=frequencies.map((freq,i)=>{
+  filters=[250,1200,3200].map((freq,i)=>{
    const f=ctx.createBiquadFilter();
-   f.type=types[i];
+   f.type=i===0?"lowshelf":i===1?"peaking":"highshelf";
    f.frequency.value=freq;
-   f.Q.value=i===1||i===2?1.0:.7;
+   f.Q.value=.8;
    f.gain.value=0;
    return f;
   });
 
+  dryGain=ctx.createGain();
   echoDelayNode=ctx.createDelay(2);
   echoFeedback=ctx.createGain();
   echoWet=ctx.createGain();
@@ -432,10 +455,19 @@ async function start(){
   convolver.buffer=makeImpulse();
   reverbWet=ctx.createGain();
 
-  shaper.oversample="4x";
+  finalCompressor=ctx.createDynamicsCompressor();
+  finalCompressor.threshold.value=-8;
+  finalCompressor.knee.value=8;
+  finalCompressor.ratio.value=8;
+  finalCompressor.attack.value=.003;
+  finalCompressor.release.value=.12;
+
+  outputGain=ctx.createGain();
 
   source.connect(input);
-  input.connect(shaper);
+  input.connect(highpass);
+  highpass.connect(preCompressor);
+  preCompressor.connect(shaper);
   shaper.connect(pitchNode);
 
   let chain=pitchNode;
@@ -445,19 +477,19 @@ async function start(){
   });
 
   chain.connect(dryGain);
-  dryGain.connect(compressor);
-  compressor.connect(outputGain);
+  dryGain.connect(finalCompressor);
 
   chain.connect(echoDelayNode);
   echoDelayNode.connect(echoFeedback);
   echoFeedback.connect(echoDelayNode);
   echoDelayNode.connect(echoWet);
-  echoWet.connect(outputGain);
+  echoWet.connect(finalCompressor);
 
   chain.connect(convolver);
   convolver.connect(reverbWet);
-  reverbWet.connect(outputGain);
+  reverbWet.connect(finalCompressor);
 
+  finalCompressor.connect(outputGain);
   outputGain.connect(ctx.destination);
 
   setPitch(Number($("pitch").value));
@@ -469,7 +501,7 @@ async function start(){
   $("stop").disabled=false;
   $("mute").disabled=false;
   await refreshMics();
-  setStatus("リアルタイム変換中",true);
+  setStatus("高音質リアルタイム変換中",true);
  }catch(e){
   console.error(e);
   await stop();
@@ -494,6 +526,10 @@ $("male").onclick=()=>setPreset("male");
 $("female").onclick=()=>setPreset("female");
 $("mix").onclick=()=>setPreset("mix");
 
+$("natural").onclick=()=>setQuality("natural");
+$("clear").onclick=()=>setQuality("clear");
+$("warm").onclick=()=>setQuality("warm");
+
 $("crush").onclick=()=>setMode("crush");
 $("clip").onclick=()=>setMode("clip");
 $("off").onclick=()=>setMode("off");
@@ -502,31 +538,19 @@ $("pitch").addEventListener("input",()=>{
  ["male","female","mix"].forEach(id=>$(id).classList.remove("selected"));
  setPitch(Number($("pitch").value));
 });
-
-$("formant").addEventListener("input",()=>{
- setFormant(Number($("formant").value));
-});
+$("formant").addEventListener("input",()=>setFormant(Number($("formant").value)));
 
 $("noiseOn").onclick=()=>{
  noiseEnabled=true;
  $("noiseOn").classList.add("selected");
  $("noiseOff").classList.remove("selected");
- if(stream){
-  stream.getAudioTracks().forEach(t=>{
-   t.applyConstraints({noiseSuppression:true}).catch(()=>{});
-  });
- }
+ if(stream)stream.getAudioTracks().forEach(t=>t.applyConstraints({noiseSuppression:true}).catch(()=>{}));
 };
-
 $("noiseOff").onclick=()=>{
  noiseEnabled=false;
  $("noiseOff").classList.add("selected");
  $("noiseOn").classList.remove("selected");
- if(stream){
-  stream.getAudioTracks().forEach(t=>{
-   t.applyConstraints({noiseSuppression:false}).catch(()=>{});
-  });
- }
+ if(stream)stream.getAudioTracks().forEach(t=>t.applyConstraints({noiseSuppression:false}).catch(()=>{}));
 };
 
 $("echoOn").onclick=()=>{
@@ -562,7 +586,6 @@ if(navigator.mediaDevices){
  refreshMics();
  navigator.mediaDevices.addEventListener?.("devicechange",refreshMics);
 }
-update();
 </script>
 </body>
 </html>
